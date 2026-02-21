@@ -4,30 +4,32 @@ import { createI18n } from 'vue-i18n';
 import messages from 'src/i18n';
 
 export type MessageLanguages = keyof typeof messages;
-// Type-define 'en-US' as the master schema for the resource
-export type MessageSchema = (typeof messages)['en-US'];
+export type MessageSchema = (typeof messages)['nl'];
 
-// See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module 'vue-i18n' {
-  // define the locale messages schema
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface DefineLocaleMessage extends MessageSchema {}
-
-  // define the datetime format schema
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface DefineDateTimeFormat {}
-
-  // define the number format schema
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface DefineNumberFormat {}
 }
-/* eslint-enable @typescript-eslint/no-empty-object-type */
+
+const STORAGE_KEY = 'floranova-locale';
+
+function getSavedLocale(): MessageLanguages {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === 'en-US' || saved === 'nl') return saved;
+  return 'nl';
+}
 
 export default defineBoot(({ app }) => {
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: 'en-US',
+    locale: getSavedLocale(),
+    fallbackLocale: 'nl',
     legacy: false,
     messages,
   });
 
-  // Set i18n instance on app
   app.use(i18n);
 });
