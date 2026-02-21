@@ -794,6 +794,550 @@ const plants: Plant[] = [
     },
     sun: 'full-sun',
   },
+
+  // ─── Cosmos bipinnatus 'Sea Shells' ──────────────────────────────
+  {
+    id: 'cosmos-bipinnatus-sea-shells',
+    species: 'Cosmos bipinnatus',
+    variety: 'Sea Shells',
+    latinName: 'Cosmos bipinnatus',
+    name: {
+      nl: 'Cosmea Sea Shells',
+      en: 'Cosmos Sea Shells',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'light',
+    colors: ['pink', 'white', 'rose', 'crimson'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Cosmos_bipinnatus_09_ies.jpg/500px-Cosmos_bipinnatus_09_ies.jpg',
+    maintenanceNotes: {
+      nl: 'Lichtkiemer: zaai oppervlakkig en bedek licht (1-2 mm). Kiemt in 7-21 dagen bij 20-25°C. Uniek ras met buisvormige/geflutte bloemblaadjes. Knip de top af bij 2-3 bladparen voor meer vertakking. Niet te veel bemesten: bevordert blad boven bloemen. Hoogte 90-120 cm.',
+      en: 'Light germinator: surface sow and cover lightly (1-2 mm). Germinates in 7-21 days at 20-25°C. Unique variety with tubular/fluted petals. Pinch tips at 2-3 leaf pairs for more branching. Do not over-fertilise: promotes foliage over flowers. Height 90-120 cm.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray'],
+    minDistanceCm: 30,
+    stemTips: {
+      nl: 'Oogst in het \'gebarsten knop\'-stadium, net voordat de bloemblaadjes volledig opengaan. De geflutte bloemblaadjes geven een bijzondere textuur in boeketten. Vaaslevensduur 5-7 dagen. Hoe meer je snijdt, hoe meer bloemen er komen.',
+      en: 'Harvest at the "cracked bud" stage, just before petals fully unfurl. The fluted petals give a unique texture in arrangements. Vase life 5-7 days. The more you cut, the more flowers you get.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Achillea millefolium 'Colorado' ─────────────────────────────
+  {
+    id: 'achillea-millefolium-colorado',
+    species: 'Achillea millefolium',
+    variety: 'Colorado',
+    latinName: 'Achillea millefolium',
+    name: {
+      nl: 'Duizendblad Colorado',
+      en: 'Yarrow Colorado',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [2, 4],
+      greenhouse: null,
+      outdoor: [4, 6],
+    },
+    germination: 'light',
+    colors: ['red', 'orange', 'yellow', 'pink', 'terracotta'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Achillea_millefolium_%28bright%29.jpg/500px-Achillea_millefolium_%28bright%29.jpg',
+    maintenanceNotes: {
+      nl: 'Vaste plant (perennial). Lichtkiemer: zaai oppervlakkig, niet bedekken. Kiemt in 10-14 dagen bij 18-21°C. Gemengde kleuren in warme tinten. Snij na de bloei terug voor een tweede bloei. Verspreid zich via worteluitlopers, kan invasief worden. Droogtetolerant. Hoogte 50-70 cm.',
+      en: 'Perennial plant. Light germinator: surface sow, do not cover. Germinates in 10-14 days at 18-21°C. Mixed warm-toned colours. Cut back after flowering for a second flush. Spreads via runners, can become invasive. Drought tolerant. Height 50-70 cm.',
+    },
+    plantingConditions: ['tray', 'module-tray', 'outside-direct', 'p9-pot'],
+    minDistanceCm: 30,
+    stemTips: {
+      nl: 'Oogst wanneer het bloemscherm voor 3/4 open is. Stevige stelen, vaaslevensduur 7-10 dagen. Droogt uitstekend: hang ondersteboven op een droge, donkere plek. Behoudt kleur goed na het drogen.',
+      en: 'Harvest when the flower head is 3/4 open. Sturdy stems, vase life 7-10 days. Dries excellently: hang upside down in a dry, dark place. Retains colour well after drying.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Zinnia elegans 'Queen Lime With Blush' ──────────────────────
+  {
+    id: 'zinnia-elegans-queen-lime-with-blush',
+    species: 'Zinnia elegans',
+    variety: 'Queen Lime With Blush',
+    latinName: 'Zinnia elegans',
+    name: {
+      nl: 'Zinnia Queen Lime With Blush',
+      en: 'Zinnia Queen Lime With Blush',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'dark',
+    colors: ['lime green', 'pink', 'blush'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Zinnia_elegans_queen_lime%2C_3.jpg/500px-Zinnia_elegans_queen_lime%2C_3.jpg',
+    maintenanceNotes: {
+      nl: 'Zaai 0,5-1 cm diep (donkerkiemer). Kiemt in 5-10 dagen bij 21-24°C. Limoengroene bloemen met roze blos die varieert per bloem. Pinch bij 20-30 cm hoogte voor meer vertakking. Niet van bovenaf water geven om meeldauw te voorkomen. Vorstgevoelig, plant na de ijsheiligen uit. Hoogte 60-90 cm.',
+      en: 'Sow 0.5-1 cm deep (dark germinator). Germinates in 5-10 days at 21-24°C. Lime-green flowers with a pink blush that varies per bloom. Pinch at 20-30 cm height for more branching. Avoid overhead watering to prevent powdery mildew. Frost sensitive, plant out after last frost. Height 60-90 cm.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray', 'p9-pot'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Cut-and-come-again bloem. Oogst wanneer de bloem volledig open is en de stengel stevig aanvoelt. Schud de stengel 20 cm onder de bloem: als hij stevig rechtop blijft, is hij klaar. Vaaslevensduur 7-10 dagen. Unieke kleurcombinatie voor arrangementen.',
+      en: 'Cut-and-come-again flower. Harvest when the flower is fully open and the stem feels firm. Shake the stem 20 cm below the bloom: if it stays firm and upright, it is ready. Vase life 7-10 days. Unique colour combination for arrangements.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Callistephus chinensis 'Matsumoto Apricot' ─────────────────
+  {
+    id: 'callistephus-chinensis-matsumoto-apricot',
+    species: 'Callistephus chinensis',
+    variety: 'Matsumoto Apricot',
+    latinName: 'Callistephus chinensis',
+    name: {
+      nl: 'Zomeraster Matsumoto Apricot',
+      en: 'China Aster Matsumoto Apricot',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'light',
+    colors: ['apricot', 'peach', 'salmon'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Callistephus_chinensis_2023-08-28_9180.jpg/500px-Callistephus_chinensis_2023-08-28_9180.jpg',
+    maintenanceNotes: {
+      nl: 'Lichtkiemer: zaai oppervlakkig, bedek amper (1-2 mm). Kiemt in 8-14 dagen bij 18-22°C. Matsumoto-serie is ziektetolerant en geschikt voor snij. Niet op dezelfde plek kweken als vorig jaar (asterverwelkingsziekte). Vorstgevoelig, plant na de ijsheiligen uit. Hoogte 60-80 cm.',
+      en: 'Light germinator: surface sow, barely cover (1-2 mm). Germinates in 8-14 days at 18-22°C. Matsumoto series is disease tolerant and bred for cutting. Do not grow in the same spot as last year (aster wilt). Frost sensitive, plant out after last frost. Height 60-80 cm.',
+    },
+    plantingConditions: ['tray', 'module-tray', 'p9-pot'],
+    minDistanceCm: 20,
+    stemTips: {
+      nl: 'Oogst wanneer de bloem voor 3/4 open is. Lange, stevige stelen van 50-70 cm. Vaaslevensduur 7-14 dagen. Verwijder blad onder de waterlijn. Niet toppen: eenstammig kweken geeft de langste stelen.',
+      en: 'Harvest when the flower is 3/4 open. Long, sturdy stems of 50-70 cm. Vase life 7-14 days. Remove foliage below the waterline. Do not pinch: grow single stem for the longest stems.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Zinnia elegans 'Queen Red Lime' ─────────────────────────────
+  {
+    id: 'zinnia-elegans-queen-red-lime',
+    species: 'Zinnia elegans',
+    variety: 'Queen Red Lime',
+    latinName: 'Zinnia elegans',
+    name: {
+      nl: 'Zinnia Queen Red Lime',
+      en: 'Zinnia Queen Red Lime',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'dark',
+    colors: ['red', 'lime green', 'coral'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/%27Queen_Red_Lime%27_zinnia_IMG_0820.jpg/500px-%27Queen_Red_Lime%27_zinnia_IMG_0820.jpg',
+    maintenanceNotes: {
+      nl: 'Zaai 0,5-1 cm diep (donkerkiemer). Kiemt in 5-10 dagen bij 21-24°C. Rode buitenste bloemblaadjes met limoengroen centrum. Pinch bij 20-30 cm hoogte. Goede luchtcirculatie tegen meeldauw. Vorstgevoelig. Hoogte 60-90 cm.',
+      en: 'Sow 0.5-1 cm deep (dark germinator). Germinates in 5-10 days at 21-24°C. Red outer petals with lime-green centre. Pinch at 20-30 cm height. Good air circulation to prevent mildew. Frost sensitive. Height 60-90 cm.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray', 'p9-pot'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Cut-and-come-again bloem. Oogst wanneer de bloem volledig open is met een stevige stengel. Test door te schudden: een rijpe stengel buigt niet. Vaaslevensduur 7-10 dagen. Opvallende tweekleurige bloem.',
+      en: 'Cut-and-come-again flower. Harvest when the flower is fully open with a firm stem. Test by shaking: a ripe stem does not bend. Vase life 7-10 days. Striking bicolour bloom.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Zinnia elegans 'Cresto! Peaches & Cream' ───────────────────
+  {
+    id: 'zinnia-elegans-cresto-peaches-and-cream',
+    species: 'Zinnia elegans',
+    variety: "Cresto! Peaches & Cream",
+    latinName: 'Zinnia elegans',
+    name: {
+      nl: 'Zinnia Cresto! Peaches & Cream',
+      en: 'Zinnia Cresto! Peaches & Cream',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'dark',
+    colors: ['peach', 'cream', 'apricot', 'salmon'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Zinnia_marylandica_Zahara_Yellow_in_Lyon_BG_%281%29.jpg/500px-Zinnia_marylandica_Zahara_Yellow_in_Lyon_BG_%281%29.jpg',
+    maintenanceNotes: {
+      nl: 'Zaai 0,5-1 cm diep (donkerkiemer). Kiemt in 5-10 dagen bij 21-24°C. Cresto-serie heeft grote, gevulde bloemen in warme perzik- en cremetinten. Pinch bij 20-30 cm hoogte. Goede luchtcirculatie tegen meeldauw. Vorstgevoelig. Hoogte 70-90 cm.',
+      en: 'Sow 0.5-1 cm deep (dark germinator). Germinates in 5-10 days at 21-24°C. Cresto series has large, double flowers in warm peach and cream tones. Pinch at 20-30 cm height. Good air circulation to prevent mildew. Frost sensitive. Height 70-90 cm.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray', 'p9-pot'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Cut-and-come-again bloem. Oogst wanneer de bloem volledig open is en de stengel stevig aanvoelt. Grote, gevulde bloemen tot 10 cm. Vaaslevensduur 7-10 dagen. Zachte kleuren ideaal voor romantische boeketten.',
+      en: 'Cut-and-come-again flower. Harvest when the flower is fully open and the stem feels firm. Large, double blooms up to 10 cm. Vase life 7-10 days. Soft colours ideal for romantic bouquets.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Xerochrysum bracteatum 'Creamy White' ──────────────────────
+  {
+    id: 'xerochrysum-bracteatum-creamy-white',
+    species: 'Xerochrysum bracteatum',
+    variety: 'Creamy White',
+    latinName: 'Xerochrysum bracteatum',
+    name: {
+      nl: 'Strobloem Creamy White',
+      en: 'Strawflower Creamy White',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'light',
+    colors: ['cream', 'white', 'ivory'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Xerochrysum_bracteatum_head10_-_Flickr_-_Macleay_Grass_Man.jpg/500px-Xerochrysum_bracteatum_head10_-_Flickr_-_Macleay_Grass_Man.jpg',
+    maintenanceNotes: {
+      nl: 'Lichtkiemer: zaai op het oppervlak en druk licht aan, NIET afdekken. Kiemt in 10-14 dagen bij 18-24°C. Uitplanten na de ijsheiligen. Goed doorlatende grond, verdraagt droogte. Witte/cremekleurige strobloem, uitstekend om te drogen.',
+      en: 'Light germinator: sow on surface and press lightly, do NOT cover. Germinates in 10-14 days at 18-24°C. Plant out after last frost. Well-drained soil, tolerates drought. White/cream strawflower, excellent for drying.',
+    },
+    plantingConditions: ['tray', 'module-tray', 'p9-pot', 'outside-direct'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Oogst wanneer de eerste 2-3 schutbladlagen open zijn maar het centrum nog gesloten is. Bloemen openen na het knippen verder. Vaaslevensduur vers tot 10 dagen. Voor drogen: ondersteboven hangen op een droge, donkere, luchtige plek. Cremewit past bij elk boeket.',
+      en: 'Harvest when the first 2-3 bract layers are open but the center is still closed. Flowers continue opening after cutting. Fresh vase life up to 10 days. For drying: hang upside down in a dry, dark, airy place. Creamy white complements any bouquet.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Verbascum 'Southern Charm' ──────────────────────────────────
+  {
+    id: 'verbascum-southern-charm',
+    species: 'Verbascum',
+    variety: 'Southern Charm',
+    latinName: 'Verbascum',
+    name: {
+      nl: 'Mottenkruid Southern Charm',
+      en: 'Mullein Southern Charm',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [2, 4],
+      greenhouse: null,
+      outdoor: [4, 6],
+    },
+    germination: 'light',
+    colors: ['peach', 'apricot', 'lavender', 'rose', 'cream'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/39/Verbascum_chaixii_1.jpg',
+    maintenanceNotes: {
+      nl: 'Vaste plant (perennial). Lichtkiemer: zaai oppervlakkig, niet bedekken. Kiemt in 14-30 dagen bij 18-22°C. Gemengde pasteltinten. Vormt eerste jaar een bladrozet, bloeit vanaf het tweede jaar. Goed doorlatende grond essentieel, verdraagt droogte. Hoogte 60-90 cm. Snij bloemaren na de bloei terug voor mogelijke tweede bloei.',
+      en: 'Perennial plant. Light germinator: surface sow, do not cover. Germinates in 14-30 days at 18-22°C. Mixed pastel shades. Forms a leaf rosette in the first year, flowers from the second year. Well-drained soil essential, tolerates drought. Height 60-90 cm. Cut back flower spikes after blooming for a possible second flush.',
+    },
+    plantingConditions: ['tray', 'module-tray', 'p9-pot'],
+    minDistanceCm: 35,
+    stemTips: {
+      nl: 'Oogst wanneer het onderste derde van de bloemen open is. Bloemaren van 30-50 cm boven het blad. Vaaslevensduur 5-7 dagen. Geeft hoogte en textuur aan arrangementen.',
+      en: 'Harvest when the lower third of the florets are open. Flower spikes of 30-50 cm above foliage. Vase life 5-7 days. Adds height and texture to arrangements.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Centaurea cyanus 'Ball Mix' ─────────────────────────────────
+  {
+    id: 'centaurea-cyanus-ball-mix',
+    species: 'Centaurea cyanus',
+    variety: 'Ball Mix',
+    latinName: 'Centaurea cyanus',
+    name: {
+      nl: 'Korenbloem Ball Mix',
+      en: 'Cornflower Ball Mix',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [4, 5],
+    },
+    germination: 'dark',
+    colors: ['blue', 'pink', 'white', 'purple', 'red'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Centaurea_Cyanus_%28219907675%29.jpeg/500px-Centaurea_Cyanus_%28219907675%29.jpeg',
+    maintenanceNotes: {
+      nl: 'Donkerkiemer: zaai 1 cm diep. Kiemt in 7-14 dagen bij 15-20°C. Gevulde, ronde bloemen in gemengde kleuren. Kan ook in de herfst (sept-okt) gezaaid worden voor vroege bloei. Goed doorlatende, niet te rijke grond. Droogtetolerant. Regelmatig uitgebloeide bloemen verwijderen.',
+      en: 'Dark germinator: sow 1 cm deep. Germinates in 7-14 days at 15-20°C. Double, ball-shaped flowers in mixed colours. Can also be autumn-sown (Sept-Oct) for early blooming. Well-drained, not overly rich soil. Drought tolerant. Deadhead regularly.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Oogst wanneer bloemen net volledig open zijn. Gevulde bloemen houden langer dan enkele. Vaaslevensduur 5-7 dagen. Droogt ook uitstekend, behoudt kleur. Knip tot het derde bladpaar voor hergroei.',
+      en: 'Harvest when flowers are just fully open. Double flowers last longer than singles. Vase life 5-7 days. Also dries excellently, retaining colour. Cut to the third leaf pair for regrowth.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Phalaris canariensis ────────────────────────────────────────
+  {
+    id: 'phalaris-canariensis',
+    species: 'Phalaris canariensis',
+    variety: null,
+    latinName: 'Phalaris canariensis',
+    name: {
+      nl: 'Kanariegras',
+      en: 'Canary Grass',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: null,
+      greenhouse: null,
+      outdoor: [4, 6],
+    },
+    germination: 'dark',
+    colors: ['green', 'cream', 'straw'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Phalaris_canariensis.jpg/500px-Phalaris_canariensis.jpg',
+    maintenanceNotes: {
+      nl: 'Donkerkiemer: zaai 1-2 cm diep, direct ter plaatse. Kiemt in 10-14 dagen bij 15-20°C. Eenjarig siergras met compact, ovaal bloemhoofd. Eenvoudig te kweken. Hoogte 60-90 cm. Geen bijzondere grond nodig, verdraagt arme grond.',
+      en: 'Dark germinator: sow 1-2 cm deep, direct sow in place. Germinates in 10-14 days at 15-20°C. Annual ornamental grass with compact, oval flower head. Easy to grow. Height 60-90 cm. No special soil needed, tolerates poor soil.',
+    },
+    plantingConditions: ['outside-direct'],
+    minDistanceCm: 15,
+    stemTips: {
+      nl: 'Oogst wanneer de pluimen nog groen zijn voor de mooiste kleur, of laat ze rijpen tot strogeel. Uitstekend als droogbloem. Vaaslevensduur vers 7-10 dagen. Geeft textuur en beweging aan boeketten.',
+      en: 'Harvest when plumes are still green for the best colour, or let them ripen to straw-yellow. Excellent dried flower. Fresh vase life 7-10 days. Adds texture and movement to bouquets.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Nigella damascena 'Persian Jewels Mix' ─────────────────────
+  {
+    id: 'nigella-damascena-persian-jewels-mix',
+    species: 'Nigella damascena',
+    variety: 'Persian Jewels Mix',
+    latinName: 'Nigella damascena',
+    name: {
+      nl: 'Juffertje in het groen Persian Jewels Mix',
+      en: 'Love-in-a-Mist Persian Jewels Mix',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: null,
+      greenhouse: null,
+      outdoor: [3, 5],
+    },
+    germination: 'dark',
+    colors: ['blue', 'pink', 'white', 'purple', 'rose'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Nigella_damascena.jpg/500px-Nigella_damascena.jpg',
+    maintenanceNotes: {
+      nl: 'Donkerkiemer: zaai 3 mm diep, direct ter plaatse. Verplanten verdragen ze slecht (penwortel). Kiemt in 14-21 dagen bij 15-18°C. Kan ook in de herfst (sept-okt) gezaaid worden. Successiezaai elke 3-4 weken voor langere bloei. Zelf-zaaiend. Hoogte 40-50 cm.',
+      en: 'Dark germinator: sow 3 mm deep, direct sow in place. Transplants poorly (taproot). Germinates in 14-21 days at 15-18°C. Can also be autumn-sown (Sept-Oct). Succession sow every 3-4 weeks for longer flowering. Self-seeding. Height 40-50 cm.',
+    },
+    plantingConditions: ['outside-direct'],
+    minDistanceCm: 15,
+    stemTips: {
+      nl: 'Oogst bloemen wanneer ze net open zijn. De opgeblazen zaaddozen zijn ook zeer decoratief in verse en droge boeketten. Vaaslevensduur bloemen 5-7 dagen. Zaaddozen drogen uitstekend.',
+      en: 'Harvest flowers when they have just opened. The inflated seed pods are also highly decorative in fresh and dried arrangements. Flower vase life 5-7 days. Seed pods dry excellently.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Lunaria annua ──────────────────────────────────────────────
+  {
+    id: 'lunaria-annua',
+    species: 'Lunaria annua',
+    variety: null,
+    latinName: 'Lunaria annua',
+    name: {
+      nl: 'Judaspenning',
+      en: 'Honesty',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 7],
+    },
+    germination: 'dark',
+    colors: ['purple', 'violet', 'white'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Lunaria_annua_flowers.jpg/500px-Lunaria_annua_flowers.jpg',
+    maintenanceNotes: {
+      nl: 'Tweejarige plant: vormt eerste jaar een bladrozet, bloeit en zaait in het tweede jaar. Donkerkiemer: zaai 1 cm diep. Kiemt in 10-14 dagen bij 15-20°C. Verdraagt halfschaduw. Zelf-zaaiend, verwildert gemakkelijk. Niet veeleisend qua grond. Hoogte 60-90 cm.',
+      en: 'Biennial plant: forms a leaf rosette in the first year, flowers and sets seed in the second year. Dark germinator: sow 1 cm deep. Germinates in 10-14 days at 15-20°C. Tolerates partial shade. Self-seeding, naturalises easily. Not fussy about soil. Height 60-90 cm.',
+    },
+    plantingConditions: ['outside-direct', 'tray', 'module-tray'],
+    minDistanceCm: 30,
+    stemTips: {
+      nl: 'De doorzichtige, zilverkleurige zaaddozen (\'penningen\') zijn de echte attractie. Oogst hele stengels wanneer de zaaddozen bruin worden. Verwijder de buitenste schillen om het zilveren vlies bloot te leggen. Houdt onbeperkt als droogbloem.',
+      en: 'The translucent, silvery seed pods ("pennies") are the real attraction. Harvest whole stems when seed pods turn brown. Peel off the outer casings to reveal the silvery membrane. Lasts indefinitely as a dried flower.',
+    },
+    sun: 'partial-shade',
+  },
+
+  // ─── Dipsacus fullonum ──────────────────────────────────────────
+  {
+    id: 'dipsacus-fullonum',
+    species: 'Dipsacus fullonum',
+    variety: null,
+    latinName: 'Dipsacus fullonum',
+    name: {
+      nl: 'Grote Kaardebol Paars',
+      en: 'Common Teasel',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [4, 6],
+    },
+    germination: 'light',
+    colors: ['purple', 'lilac', 'green'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Dipsacus_fullonum1.jpg/500px-Dipsacus_fullonum1.jpg',
+    maintenanceNotes: {
+      nl: 'Tweejarige vaste plant: bladrozet eerste jaar, bloei in het tweede jaar. Lichtkiemer: zaai oppervlakkig. Kiemt in 14-21 dagen bij 15-20°C. Vormt grote, stekelige bloemhoofden die bijen en vlinders aantrekken. Kan invasief worden door zelfuitzaai. Hoogte 150-200 cm. Stevig en doornig, draag handschoenen bij de oogst.',
+      en: 'Biennial perennial: leaf rosette in the first year, flowers in the second year. Light germinator: surface sow. Germinates in 14-21 days at 15-20°C. Forms large, spiny flower heads that attract bees and butterflies. Can become invasive through self-seeding. Height 150-200 cm. Sturdy and thorny, wear gloves when harvesting.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray'],
+    minDistanceCm: 45,
+    stemTips: {
+      nl: 'Oogst voor droogboeketten wanneer de bloemhoofden hun kleur beginnen te verliezen en droger worden. De eiervormige hoofden zijn zeer decoratief gedroogd. Kan ook geverfd of gespoten worden. Houdt onbeperkt als droogbloem.',
+      en: 'Harvest for dried arrangements when the flower heads start losing colour and become drier. The egg-shaped heads are highly decorative when dried. Can also be dyed or spray-painted. Lasts indefinitely as a dried flower.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Scabiosa stellata 'Drumstick' ──────────────────────────────
+  {
+    id: 'scabiosa-stellata-drumstick',
+    species: 'Scabiosa stellata',
+    variety: 'Drumstick',
+    latinName: 'Scabiosa stellata',
+    name: {
+      nl: 'Duifkruid Drumsticks',
+      en: 'Starflower Pincushion Drumstick',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [2, 4],
+      greenhouse: [3, 5],
+      outdoor: [4, 6],
+    },
+    germination: 'light',
+    colors: ['pale blue', 'white', 'bronze'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Scabiosa_stellata.jpg/500px-Scabiosa_stellata.jpg',
+    maintenanceNotes: {
+      nl: 'Lichtkiemer: zaai oppervlakkig of net bedekt bij 15-18°C. Kiemt in 10-14 dagen. Afharden en na laatste vorst uitplanten. Gekweekt voor de spectaculaire, papierachtige zaaddozen (\'drumsticks\') eerder dan de bloemen. Hoogte 40-60 cm. Goed doorlatende grond.',
+      en: 'Light germinator: surface sow or barely cover at 15-18°C. Germinates in 10-14 days. Harden off and plant out after last frost. Grown for the spectacular, papery seed heads ("drumsticks") rather than the flowers. Height 40-60 cm. Well-drained soil.',
+    },
+    plantingConditions: ['tray', 'module-tray', 'p9-pot', 'outside-direct'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Laat de bloemen uitbloeien en oogst de zaaddozen wanneer ze volledig gevormd en papierachtig zijn. De bolvormige, bronzen zaaddozen zijn de echte attractie. Uitstekend als droogbloem, houdt maanden. Vers vaaslevensduur 7-10 dagen.',
+      en: 'Let flowers fade and harvest the seed heads when fully formed and papery. The spherical, bronze seed heads are the real attraction. Excellent dried flower, lasts for months. Fresh vase life 7-10 days.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Cosmos bipinnatus 'Apricot Lemonade' ───────────────────────
+  {
+    id: 'cosmos-bipinnatus-apricot-lemonade',
+    species: 'Cosmos bipinnatus',
+    variety: 'Apricot Lemonade',
+    latinName: 'Cosmos bipinnatus',
+    name: {
+      nl: 'Cosmea Apricot Lemonade',
+      en: 'Cosmos Apricot Lemonade',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [5, 6],
+    },
+    germination: 'light',
+    colors: ['apricot', 'yellow', 'peach', 'lemon'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Cosmos_bipinnatus_%285%29.jpg/500px-Cosmos_bipinnatus_%285%29.jpg',
+    maintenanceNotes: {
+      nl: 'Lichtkiemer: zaai oppervlakkig en bedek licht (1-2 mm). Kiemt in 7-21 dagen bij 20-25°C. Doorbraakras: eerste echte gele/abrikoos bipinnatus-type cosmos. Knip de top af bij 2-3 bladparen. Niet te veel bemesten. Hoogte 90-120 cm. Bloeit van juli tot de vorst.',
+      en: 'Light germinator: surface sow and cover lightly (1-2 mm). Germinates in 7-21 days at 20-25°C. Breakthrough variety: first true yellow/apricot bipinnatus-type cosmos. Pinch tips at 2-3 leaf pairs. Do not over-fertilise. Height 90-120 cm. Flowers July until frost.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray'],
+    minDistanceCm: 30,
+    stemTips: {
+      nl: 'Oogst in het \'gebarsten knop\'-stadium. Unieke abrikoos-citroengele kleur die zeldzaam is bij cosmos. Vaaslevensduur 5-7 dagen. Hoe meer je snijdt, hoe meer bloemen er komen.',
+      en: 'Harvest at the "cracked bud" stage. Unique apricot-lemon yellow colour that is rare in cosmos. Vase life 5-7 days. The more you cut, the more flowers you get.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Amberboa moschata 'Rosy Lilac' ─────────────────────────────
+  {
+    id: 'amberboa-moschata-rosy-lilac',
+    species: 'Amberboa moschata',
+    variety: 'Rosy Lilac',
+    latinName: 'Amberboa moschata',
+    name: {
+      nl: 'Amerikaanse Korenbloem Rosy Lilac',
+      en: 'Sweet Sultan Rosy Lilac',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: [3, 4],
+      greenhouse: null,
+      outdoor: [4, 5],
+    },
+    germination: 'dark',
+    colors: ['lilac', 'rose', 'pink'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Amberboa_moschata1UME.jpg',
+    maintenanceNotes: {
+      nl: 'Donkerkiemer: zaai 0,5-1 cm diep. Kiemt in 10-14 dagen bij 15-20°C. Heerlijk geurend! Presteert het best bij koeler weer, kan bij hitte stoppen met bloeien. Successiezaai in het voorjaar voor langere bloei. Goed doorlatende grond. Hoogte 50-70 cm.',
+      en: 'Dark germinator: sow 0.5-1 cm deep. Germinates in 10-14 days at 15-20°C. Wonderfully fragrant! Performs best in cooler weather, may stop flowering in heat. Succession sow in spring for longer flowering. Well-drained soil. Height 50-70 cm.',
+    },
+    plantingConditions: ['tray', 'outside-direct', 'module-tray'],
+    minDistanceCm: 25,
+    stemTips: {
+      nl: 'Oogst wanneer de bloemen net volledig open zijn. Heerlijke muskusgeur. Vaaslevensduur 5-7 dagen. Pluizige, korenbloem-achtige bloemen in zacht roze-lila. Knip regelmatig voor meer bloemen.',
+      en: 'Harvest when flowers are just fully open. Lovely musky fragrance. Vase life 5-7 days. Fluffy, cornflower-like blooms in soft rosy lilac. Cut regularly for more flowers.',
+    },
+    sun: 'full-sun',
+  },
+
+  // ─── Phacelia tanacetifolia ──────────────────────────────────────
+  {
+    id: 'phacelia-tanacetifolia',
+    species: 'Phacelia tanacetifolia',
+    variety: null,
+    latinName: 'Phacelia tanacetifolia',
+    name: {
+      nl: 'Bijenvoer / Phacelia',
+      en: 'Lacy Phacelia / Bee Food',
+    },
+    type: 'flower',
+    calendar: {
+      indoorSowing: null,
+      greenhouse: null,
+      outdoor: [3, 7],
+    },
+    germination: 'dark',
+    colors: ['lavender', 'blue', 'purple'],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Phacelia_tanacetifolia_7864.JPG/500px-Phacelia_tanacetifolia_7864.JPG',
+    maintenanceNotes: {
+      nl: 'Donkerkiemer: zaai 1-2 cm diep, direct ter plaatse. Kiemt in 10-14 dagen bij 12-18°C. Topplant voor bijen en bestuivers! Wordt ook als groenbemester gebruikt. Zeer eenvoudig te kweken. Verdraagt arme grond. Successiezaai voor langere bloei. Hoogte 50-90 cm.',
+      en: 'Dark germinator: sow 1-2 cm deep, direct sow in place. Germinates in 10-14 days at 12-18°C. Top plant for bees and pollinators! Also used as green manure. Very easy to grow. Tolerates poor soil. Succession sow for longer flowering. Height 50-90 cm.',
+    },
+    plantingConditions: ['outside-direct'],
+    minDistanceCm: 15,
+    stemTips: {
+      nl: 'Beperkt bruikbaar als snijbloem, maar de krullende lavendelblauwe bloemaren zijn decoratief in wilde boeketten. Oogst wanneer de eerste bloemetjes aan de aar open zijn. Vaaslevensduur 3-5 dagen.',
+      en: 'Limited use as cut flower, but the curling lavender-blue flower spikes are decorative in wild-style bouquets. Harvest when the first florets on the spike are open. Vase life 3-5 days.',
+    },
+    sun: 'full-sun',
+  },
 ];
 
 export default plants;
