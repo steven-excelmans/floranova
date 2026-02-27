@@ -1,1 +1,195 @@
-// app global css in SCSS form
+// ════════════════════════════════════════════════════════════════
+// FLORANOVA — Neo-Organic Design System
+// Global styles, CSS variables, and font imports
+// ════════════════════════════════════════════════════════════════
+
+// ── Google Fonts ──
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Karla:wght@300;400;500;600;700&display=swap');
+
+// ── CSS Custom Properties ──
+:root {
+  // Core palette
+  --sand: #F5F0E8;
+  --warm-white: #FEFCF7;
+  --moss: #5C6B4E;
+  --moss-light: #6E7D5F;
+  --moss-pale: #E6EBE2;
+  --moss-ghost: #F0F3ED;
+  --clay: #B8886E;
+  --clay-light: #CDAB94;
+  --clay-pale: #F3E8DF;
+  --deep-brown: #352B22;
+  --ink-soft: #5A4E42;
+  --muted: #8B7E72;
+  --muted-light: #A89E93;
+  --border: #DDD6CB;
+  --border-light: #EAE4DB;
+
+  // Type badges
+  --flower: #C4858A;
+  --flower-bg: #F6E8EA;
+  --herb: #7B9470;
+  --herb-bg: #E8F0E5;
+  --veg: #8B9550;
+  --veg-bg: #EDEFE0;
+
+  // Calendar colors
+  --cal-indoor: #7DA1B8;
+  --cal-indoor-bg: rgba(125, 161, 184, 0.1);
+  --cal-cold: #A0A5A0;
+  --cal-cold-bg: rgba(160, 165, 160, 0.1);
+  --cal-outdoor: #7B9470;
+  --cal-outdoor-bg: rgba(123, 148, 112, 0.1);
+  --cal-empty: #E8E3DB;
+
+  // Status colors (garden)
+  --overdue: #C25B4E;
+  --overdue-bg: #F8E8E5;
+  --soon: #D4A24E;
+  --soon-bg: #FDF3E2;
+  --ok: #5C6B4E;
+  --ok-bg: #E8F0E5;
+
+  // Shadows
+  --shadow-card: 0 2px 16px rgba(139, 115, 85, 0.08);
+  --shadow-card-hover: 0 4px 24px rgba(139, 115, 85, 0.14);
+  --shadow-header: 0 4px 20px rgba(139, 115, 85, 0.06);
+  --shadow-nav: 0 -4px 20px rgba(139, 115, 85, 0.08);
+  --shadow-soft: 0 2px 16px rgba(53, 43, 34, 0.06);
+  --shadow-button: 0 2px 8px rgba(53, 43, 34, 0.10);
+  --shadow-elevated: 0 4px 20px rgba(53, 43, 34, 0.08);
+
+  // Radii
+  --radius-card: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 100px;
+
+  // Typography
+  --font-logo: 'Plus Jakarta Sans', 'Helvetica Neue', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Georgia', serif;
+  --font-body: 'Karla', 'Helvetica Neue', sans-serif;
+}
+
+// ── Base styles ──
+html {
+  background: var(--sand);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--deep-brown);
+  background: var(--sand);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ── Noise texture overlay ──
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+// ── Quasar overrides ──
+.q-layout {
+  background: var(--sand);
+}
+
+.q-page-container {
+  background: var(--sand);
+}
+
+// Override Quasar header/footer
+.q-header {
+  background: var(--warm-white) !important;
+  box-shadow: var(--shadow-header) !important;
+}
+
+.q-footer {
+  background: var(--warm-white) !important;
+  box-shadow: var(--shadow-nav) !important;
+  border-top: 1px solid rgba(139, 115, 85, 0.06);
+}
+
+// Override Quasar tabs in footer
+.q-tabs {
+  .q-tab {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--muted-light);
+    text-transform: none;
+    min-height: 52px;
+
+    .q-tab__icon {
+      font-size: 23px;
+    }
+
+    .q-tab__label {
+      font-family: var(--font-body);
+      font-size: 10.5px;
+      line-height: 1;
+    }
+
+    &.q-tab--active {
+      color: var(--moss);
+      font-weight: 600;
+    }
+  }
+
+  .q-tab__indicator {
+    background: var(--moss) !important;
+    height: 2.5px;
+    border-radius: 0 0 2px 2px;
+    top: 0;
+    bottom: auto;
+  }
+}
+
+// Override Quasar dialog
+.q-dialog__inner > .q-card {
+  border-radius: var(--radius-card);
+  background: var(--warm-white);
+}
+
+// Override Quasar notify
+.q-notification {
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+}
+
+// ── Scrollbar styling ──
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-light);
+  border-radius: 4px;
+}
+
+// ── Gradient divider utility ──
+.organic-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 15%,
+    var(--border) 85%,
+    transparent 100%
+  );
+}

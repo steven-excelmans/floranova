@@ -4,8 +4,8 @@
   "description": "Seed planner for flowers, vegetables and herbs",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#1976d2",
+  "background_color": "#F5F0E8",
+  "theme_color": "#5C6B4E",
   "start_url": ".",
   "icons": [
     {

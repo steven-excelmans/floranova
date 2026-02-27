@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#352B22"/>
+  <!-- Abstract flower: 5 petals radiating from center -->
+  <g transform="translate(16, 15)">
+    <!-- Petals in warm-white, rotated around center -->
+    <ellipse cx="0" cy="-6" rx="3.2" ry="5.5" fill="#FEFCF7" opacity="0.92"/>
+    <ellipse cx="0" cy="-6" rx="3.2" ry="5.5" fill="#FEFCF7" opacity="0.85" transform="rotate(72)"/>
+    <ellipse cx="0" cy="-6" rx="3.2" ry="5.5" fill="#FEFCF7" opacity="0.78" transform="rotate(144)"/>
+    <ellipse cx="0" cy="-6" rx="3.2" ry="5.5" fill="#FEFCF7" opacity="0.85" transform="rotate(216)"/>
+    <ellipse cx="0" cy="-6" rx="3.2" ry="5.5" fill="#FEFCF7" opacity="0.92" transform="rotate(288)"/>
+    <!-- Center dot in moss green -->
+    <circle cx="0" cy="0" r="3" fill="#5C6B4E"/>
+  </g>
+</svg>

@@ -18,6 +18,10 @@ const routes: RouteRecordRaw[] = [
         path: 'plant/:id',
         component: () => import('pages/PlantDetailPage.vue'),
       },
+      {
+        path: 'garden',
+        component: () => import('pages/MyGardenPage.vue'),
+      },
     ],
   },
   {

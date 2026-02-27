@@ -1,10 +1,12 @@
 <template>
-  <div
-    v-if="range"
-    class="month-range-bar"
-    :class="colorClass"
-    :style="barStyle"
-  />
+  <div class="month-grid">
+    <div
+      v-for="month in 12"
+      :key="month"
+      class="month-cell"
+      :class="isActive(month) ? `month-cell--${actionKey}` : ''"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -17,48 +19,53 @@ const props = defineProps<{
   action: CalendarAction;
 }>();
 
-const actionColorMap: Record<string, string> = {
-  indoorSowing: 'bar--indoor',
-  greenhouse: 'bar--greenhouse',
-  outdoor: 'bar--outdoor',
+const actionKeyMap: Record<string, string> = {
+  indoorSowing: 'indoor',
+  greenhouse: 'greenhouse',
+  coldGreenhouse: 'cold',
+  outdoor: 'outdoor',
 };
 
-const colorClass = computed(() => actionColorMap[props.action]);
+const actionKey = computed(() => actionKeyMap[props.action] ?? props.action);
 
-const barStyle = computed(() => {
-  if (!props.range) return {};
+function isActive(month: number): boolean {
+  if (!props.range) return false;
   const [start, end] = props.range;
-
   if (start <= end) {
-    return {
-      gridColumnStart: start,
-      gridColumnEnd: end + 1,
-    };
+    return month >= start && month <= end;
   }
-  // Wrap-around: show from start to 12 (we don't render the Jan portion for simplicity)
-  return {
-    gridColumnStart: start,
-    gridColumnEnd: 13,
-  };
-});
+  // Wrap-around (e.g. Nov–Feb)
+  return month >= start || month <= end;
+}
 </script>
 
 <style scoped lang="scss">
-.month-range-bar {
-  height: 8px;
-  border-radius: 4px;
-  min-width: 0;
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  height: 12px;
 }
 
-.bar--indoor {
-  background-color: #42a5f5;
-}
+.month-cell {
+  border-radius: 3px;
+  background: transparent;
+  transition: opacity 0.2s;
 
-.bar--greenhouse {
-  background-color: #ff9800;
-}
+  &--indoor {
+    background: var(--cal-indoor);
+  }
 
-.bar--outdoor {
-  background-color: #66bb6a;
+  &--greenhouse {
+    background: var(--cal-indoor);
+  }
+
+  &--cold {
+    background: var(--cal-cold);
+  }
+
+  &--outdoor {
+    background: var(--cal-outdoor);
+  }
 }
 </style>
