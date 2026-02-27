@@ -184,7 +184,7 @@ function calBarClasses(month: number): Record<string, boolean> {
 // ── Image ──
 .plant-img-wrap {
   width: 110px;
-  min-height: 130px;
+  height: 130px;
   flex-shrink: 0;
   border-radius: 16px 12px 16px 12px;
   overflow: hidden;
@@ -201,7 +201,6 @@ function calBarClasses(month: number): Record<string, boolean> {
 
 .plant-img-placeholder {
   width: 100%;
-  min-height: 130px;
   height: 100%;
   display: flex;
   align-items: center;

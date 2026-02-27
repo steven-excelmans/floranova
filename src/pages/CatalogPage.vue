@@ -114,7 +114,7 @@ const totalPlants = computed(() => {
 // ── Sticky filters area ──
 .filters-sticky {
   position: sticky;
-  top: 0;
+  top: var(--header-height, 50px);
   z-index: 50;
   background: var(--warm-white);
   box-shadow: var(--shadow-header);
