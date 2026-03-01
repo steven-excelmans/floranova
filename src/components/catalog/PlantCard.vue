@@ -186,6 +186,7 @@ function calBarClasses(month: number): Record<string, boolean> {
   width: 110px;
   height: 130px;
   flex-shrink: 0;
+  align-self: flex-start;
   border-radius: 16px 12px 16px 12px;
   overflow: hidden;
   position: relative;
@@ -196,6 +197,7 @@ function calBarClasses(month: number): Record<string, boolean> {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   display: block;
 }
 
