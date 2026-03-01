@@ -10,11 +10,14 @@ export function useLocale() {
     return locale.value === 'nl' ? text.nl : text.en;
   }
 
-  function toggleLocale() {
-    const next = locale.value === 'nl' ? 'en-US' : 'nl';
-    locale.value = next;
-    localStorage.setItem(STORAGE_KEY, next);
+  function setLocale(value: string) {
+    locale.value = value;
+    localStorage.setItem(STORAGE_KEY, value);
   }
 
-  return { locale, localize, toggleLocale };
+  function toggleLocale() {
+    setLocale(locale.value === 'nl' ? 'en-US' : 'nl');
+  }
+
+  return { locale, localize, setLocale, toggleLocale };
 }

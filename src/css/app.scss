@@ -116,12 +116,14 @@ body::before {
 .q-header {
   background: var(--warm-white) !important;
   box-shadow: var(--shadow-header) !important;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .q-footer {
   background: var(--warm-white) !important;
   box-shadow: var(--shadow-nav) !important;
   border-top: 1px solid rgba(139, 115, 85, 0.06);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 // Override Quasar tabs in footer

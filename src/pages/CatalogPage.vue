@@ -1,19 +1,5 @@
 <template>
   <q-page class="catalog-page">
-    <!-- Sticky filter header -->
-    <div class="filters-sticky">
-      <PlantFilters
-        :search="plantStore.search"
-        :type-filter="plantStore.typeFilter"
-        :sun-filter="plantStore.sunFilter"
-        :stock-only="plantStore.stockOnly"
-        @update:search="plantStore.search = $event"
-        @update:type-filter="plantStore.typeFilter = $event"
-        @update:sun-filter="plantStore.sunFilter = $event"
-        @update:stock-only="plantStore.stockOnly = $event"
-      />
-    </div>
-
     <!-- Content area -->
     <div class="content">
       <!-- Result count -->
@@ -77,7 +63,6 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { useStockStore } from 'src/stores/stock-store';
-import PlantFilters from 'src/components/catalog/PlantFilters.vue';
 import PlantCard from 'src/components/catalog/PlantCard.vue';
 
 const { t } = useI18n();
@@ -109,16 +94,6 @@ const totalPlants = computed(() => {
 .catalog-page {
   background: var(--sand);
   min-height: 100vh;
-}
-
-// ── Sticky filters area ──
-.filters-sticky {
-  position: sticky;
-  top: var(--header-height, 50px);
-  z-index: 50;
-  background: var(--warm-white);
-  box-shadow: var(--shadow-header);
-  padding-top: 14px;
 }
 
 // ── Content area ──

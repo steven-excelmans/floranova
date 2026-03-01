@@ -41,6 +41,14 @@ export const usePlantStore = defineStore('plants', () => {
     return groups;
   });
 
+  const hasActiveFilter = computed(
+    () =>
+      search.value !== '' ||
+      typeFilter.value !== null ||
+      sunFilter.value !== null ||
+      stockOnly.value,
+  );
+
   function getPlantById(id: string): Plant | undefined {
     return plants.value.find((p) => p.id === id);
   }
@@ -60,6 +68,7 @@ export const usePlantStore = defineStore('plants', () => {
     stockOnly,
     filteredPlants,
     groupedBySpecies,
+    hasActiveFilter,
     getPlantById,
     resetFilters,
   };
