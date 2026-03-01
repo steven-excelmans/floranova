@@ -168,7 +168,7 @@ const locationOptions: { label: string; value: PlantingLocation }[] = [
 ];
 
 function submit() {
-  plantingStore.addPlanting({
+  void plantingStore.addPlanting({
     plantId: form.plantId,
     dateSeeded: form.dateSeeded,
     amount: form.amount,

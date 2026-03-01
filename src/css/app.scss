@@ -50,6 +50,14 @@
   --ok: #5C6B4E;
   --ok-bg: #E8F0E5;
 
+  // Plant status colors (admin)
+  --status-pending: var(--clay);
+  --status-pending-bg: var(--clay-pale);
+  --status-unverified: var(--cal-indoor);
+  --status-unverified-bg: rgba(125, 161, 184, 0.12);
+  --status-verified: var(--moss);
+  --status-verified-bg: var(--moss-pale);
+
   // Shadows
   --shadow-card: 0 2px 16px rgba(139, 115, 85, 0.08);
   --shadow-card-hover: 0 4px 24px rgba(139, 115, 85, 0.14);
@@ -76,32 +84,17 @@
 
 // ── Base styles ──
 html {
-  background: var(--sand);
+  background: var(--warm-white);
 }
 
 body {
   font-family: var(--font-body);
   color: var(--deep-brown);
-  background: var(--sand);
+  background: var(--warm-white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-// ── Noise texture overlay ──
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 200px 200px;
-}
 
 // ── Quasar overrides ──
 .q-layout {
@@ -110,20 +103,22 @@ body::before {
 
 .q-page-container {
   background: var(--sand);
+  position: relative;
+  z-index: 1;
 }
 
 // Override Quasar header/footer
 .q-header {
   background: var(--warm-white) !important;
   box-shadow: var(--shadow-header) !important;
-  padding-top: env(safe-area-inset-top, 0px);
+  z-index: 2000 !important;
+
 }
 
 .q-footer {
   background: var(--warm-white) !important;
   box-shadow: var(--shadow-nav) !important;
   border-top: 1px solid rgba(139, 115, 85, 0.06);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 // Override Quasar tabs in footer

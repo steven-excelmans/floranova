@@ -32,6 +32,12 @@
         </div>
       </div>
 
+      <!-- Status badge for non-verified plants -->
+      <div v-if="plant.status !== 'verified'" class="plant-status" :class="`plant-status--${plant.status}`">
+        <span class="material-icons-outlined">{{ plant.status === 'pending' ? 'hourglass_empty' : 'info' }}</span>
+        {{ plant.status === 'pending' ? t('plant.pending') : t('plant.notVerified') }}
+      </div>
+
       <!-- Block: Sun requirement -->
       <div class="plant-sun">
         <span class="material-icons-outlined">{{ sunIcon }}</span>
@@ -303,6 +309,31 @@ function calBarClasses(month: number): Record<string, boolean> {
   &.vegetable {
     background: var(--veg-bg);
     color: var(--veg);
+  }
+}
+
+.plant-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+
+  .material-icons-outlined {
+    font-size: 12px;
+  }
+
+  &--pending {
+    color: var(--clay);
+    background: var(--clay-pale);
+  }
+
+  &--unverified {
+    color: var(--cal-indoor);
+    background: rgba(125, 161, 184, 0.12);
   }
 }
 

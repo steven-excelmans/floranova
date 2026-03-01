@@ -57,9 +57,9 @@
             <PlantTypeBadge :type="plant.type" class="header__badge" />
           </div>
           <p class="header__latin">{{ plant.latinName }}</p>
-          <span v-if="!plant.verified" class="header__verification">
+          <span v-if="plant.status !== 'verified'" class="header__verification" :class="{ 'header__verification--pending': plant.status === 'pending' }">
             <span class="material-icons-outlined">info</span>
-            {{ t('plant.notVerified') }}
+            {{ plant.status === 'pending' ? t('plant.pending') : t('plant.notVerified') }}
           </span>
         </div>
 

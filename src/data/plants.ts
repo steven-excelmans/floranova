@@ -47,7 +47,7 @@ const plants: Plant[] = [
       en: 'Harvest when flowers are just fully open. Cut to the third leaf pair to encourage regrowth. Vase life 5-7 days. Also dries excellently, retaining color.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Centaurea cyanus 'Black Ball' ────────────────────────────────
@@ -91,7 +91,7 @@ const plants: Plant[] = [
       en: 'Harvest at full bloom. Cut above the third leaf pair for more flowers and longer stems. Vase life 5-7 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Helianthus annuus 'Moulin Rouge' ────────────────────────────
@@ -130,7 +130,7 @@ const plants: Plant[] = [
       en: 'Harvest when outer petals begin to lift away from the center. Pollen-free so no stains on textiles. Flowers 13-18 cm. Vase life 7-10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Envy' ────────────────────────────────────────
@@ -179,7 +179,7 @@ const plants: Plant[] = [
       en: 'Cut-and-come-again flower: the more you cut, the more flowers you get. Harvest when flowers are fully open with firm stems. Vase life 7-10 days. Unique green color, perfect for arrangements.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Cupcakes Mix' ────────────────────────────────
@@ -228,7 +228,7 @@ const plants: Plant[] = [
       en: 'Cut-and-come-again flower. Harvest with firm, straight stems when flower is fully open. Semi-double to double blooms of about 5 cm. Vase life 7-10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Phlox drummondii 'Creme Brulee' ─────────────────────────────
@@ -272,7 +272,7 @@ const plants: Plant[] = [
       en: 'Harvest when 1/3 to 1/2 of blooms on a stem are open. Place in water immediately and condition. Vase life 5-7 days. Carefully pinch off spent florets for longer stems.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Matthiola incana 'Apricot' ──────────────────────────────────
@@ -321,7 +321,7 @@ const plants: Plant[] = [
       en: 'Harvest when 1/3 to 1/2 of florets on the spike are open. Condition in cool water immediately, preferably overnight. Wonderfully fragrant! Vase life up to 10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Xerochrysum bracteatum 'Pretty Pink' ────────────────────────
@@ -365,7 +365,7 @@ const plants: Plant[] = [
       en: 'Harvest when the first 2-3 bract layers are open but the center is still closed. Flowers continue opening after cutting. Fresh vase life up to 10 days. For drying: hang upside down in a dry, dark, airy place.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Zinderella Peach' ─────────────────────────────
@@ -409,7 +409,7 @@ const plants: Plant[] = [
       en: 'Harvest when flower is fully open. Test by shaking the stem 20 cm below the bloom: if it stays firm and upright, it is ready to cut. Scallop-shaped petals. Vase life 7+ days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Gomphrena globosa 'QIS Mix' ──────────────────────────────────
@@ -453,7 +453,7 @@ const plants: Plant[] = [
       en: 'Harvest when blooms are in full colour but not faded. Cut deep into the plant, down to 1-2 leaf pairs from the base, for longer stems and more regrowth. Excellent dried flower: retains colour perfectly.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Sanguisorba officinalis 'Red Thunder' ────────────────────────
@@ -497,7 +497,7 @@ const plants: Plant[] = [
       en: 'Harvest when the dark-red bottlebrush flowers are nearly fully open. Long, graceful stems (90-120 cm) are ideal for wild-style arrangements. Vase life 5-7 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Cosmos bipinnatus 'Rose Picotee' ─────────────────────────────
@@ -546,7 +546,7 @@ const plants: Plant[] = [
       en: 'Harvest at the "cracked bud" stage, just before petals fully unfurl. Vase life 5-7 days. The more you cut, the more flowers you get.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Cosmos bipinnatus 'Kiiro' ────────────────────────────────────
@@ -585,7 +585,7 @@ const plants: Plant[] = [
       en: 'Harvest at the "cracked bud" stage for longer vase life. Soft yellow colour fades to white at the centre, reverse of petals has a peach tinge. Vase life 5-7 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Beta vulgaris 'Burpee\'s Golden' ─────────────────────────────
@@ -621,7 +621,7 @@ const plants: Plant[] = [
     minDistanceCm: 10,
     stemTips: null,
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Beta vulgaris 'Chioggia' ─────────────────────────────────────
@@ -657,7 +657,7 @@ const plants: Plant[] = [
     minDistanceCm: 10,
     stemTips: null,
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Psylliostachys suworowii 'Pink Pokers' ──────────────────────
@@ -701,7 +701,7 @@ const plants: Plant[] = [
       en: 'Harvest when most florets show colour, during dry weather. Pipe-cleaner shaped spikes of 20-40 cm. Excellent dried flower: hang upside down in a dry, dark location. Retains colour after drying.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Antirrhinum majus 'Potomac Appleblossom' ───────────────────
@@ -745,7 +745,7 @@ const plants: Plant[] = [
       en: 'Harvest when the lower third of the florets are open. Cut at an angle and place directly in clean water. Vase life 7-10 days. Snip the stem tip to encourage all florets to open evenly.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Antirrhinum majus 'DoubleShot Peach F1' ───────────────────
@@ -784,7 +784,7 @@ const plants: Plant[] = [
       en: 'Harvest when the lower half of the florets are open. Double blooms last longer than singles. Vase life 7-10 days. Remove foliage below the waterline.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Scabiosa atropurpurea 'Summer Fruits' ─────────────────────
@@ -828,7 +828,7 @@ const plants: Plant[] = [
       en: 'Harvest when the flower is just fully open. Vase life 5-7 days. Change water regularly. The seed pods are also decorative in dried arrangements.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Helianthus annuus 'ProCut Plum F1' ────────────────────────
@@ -867,7 +867,7 @@ const plants: Plant[] = [
       en: 'Harvest as soon as the first petals begin to lift off the central disk. Strip three-quarters of the leaves. Pollenless = no stains on tablecloths. Vase life 7-10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Craspedia globosa 'Drumstick' ─────────────────────────────
@@ -906,7 +906,7 @@ const plants: Plant[] = [
       en: 'Harvest when flower heads are fully open and uniformly golden. Excellent dried flower: hang upside down in a dry, dark place. Vase life fresh 7-10 days; dried indefinitely.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Helianthus annuus 'Astra Rose Cream' ──────────────────────
@@ -945,7 +945,7 @@ const plants: Plant[] = [
       en: 'Harvest when petals just begin to open. Branching type yields multiple, smaller flowers - ideal for bouquets. Vase life 7-10 days. Note: has pollen that can stain.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Eschscholzia californica 'Thai Silk Pink Champagne' ───────
@@ -978,7 +978,7 @@ const plants: Plant[] = [
       en: 'Limited use as cut flower. Harvest at colored bud stage. Individual flowers last 3-4 days, but new buds on the stem open afterwards. Sear the stem ends briefly with a flame or hot water for better water uptake.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Helianthus annuus 'ProCut White Nite F1' ──────────────────
@@ -1017,7 +1017,7 @@ const plants: Plant[] = [
       en: 'Harvest as soon as the first petals start to lift from the disk. Strip three-quarters of the leaves. Pollenless = clean in bouquets. Vase life 7-10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Trachymene coerulea 'Lacy Blue' ───────────────────────────
@@ -1061,7 +1061,7 @@ const plants: Plant[] = [
       en: 'Harvest when half of the florets on the umbel are open. Long, stiff stems - ideal for arrangements. Vase life up to 10 days. Cut in the coolest part of the day.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Cosmos bipinnatus 'Sea Shells' ──────────────────────────────
@@ -1100,7 +1100,7 @@ const plants: Plant[] = [
       en: 'Harvest at the "cracked bud" stage, just before petals fully unfurl. The fluted petals give a unique texture in arrangements. Vase life 5-7 days. The more you cut, the more flowers you get.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Achillea millefolium 'Colorado' ─────────────────────────────
@@ -1144,7 +1144,7 @@ const plants: Plant[] = [
       en: 'Harvest when the flower head is 3/4 open. Sturdy stems, vase life 7-10 days. Dries excellently: hang upside down in a dry, dark place. Retains colour well after drying.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Queen Lime With Blush' ──────────────────────
@@ -1188,7 +1188,7 @@ const plants: Plant[] = [
       en: 'Cut-and-come-again flower. Harvest when the flower is fully open and the stem feels firm. Shake the stem 20 cm below the bloom: if it stays firm and upright, it is ready. Vase life 7-10 days. Unique colour combination for arrangements.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Callistephus chinensis 'Matsumoto Apricot' ─────────────────
@@ -1227,7 +1227,7 @@ const plants: Plant[] = [
       en: 'Harvest when the flower is 3/4 open. Long, sturdy stems of 50-70 cm. Vase life 7-14 days. Remove foliage below the waterline.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Queen Red Lime' ─────────────────────────────
@@ -1266,7 +1266,7 @@ const plants: Plant[] = [
       en: 'Cut-and-come-again flower. Harvest when the flower is fully open with a firm stem. Test by shaking: a ripe stem does not bend. Vase life 7-10 days. Striking bicolour bloom.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Zinnia elegans 'Cresto! Peaches & Cream' ───────────────────
@@ -1305,7 +1305,7 @@ const plants: Plant[] = [
       en: 'Cut-and-come-again flower. Harvest when the flower is fully open and the stem feels firm. Large, double blooms up to 10 cm. Vase life 7-10 days. Soft colours ideal for romantic bouquets.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Xerochrysum bracteatum 'Creamy White' ──────────────────────
@@ -1349,7 +1349,7 @@ const plants: Plant[] = [
       en: 'Harvest when the first 2-3 bract layers are open but the center is still closed. Flowers continue opening after cutting. Fresh vase life up to 10 days. For drying: hang upside down in a dry, dark, airy place. Creamy white complements any bouquet.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Verbascum 'Southern Charm' ──────────────────────────────────
@@ -1393,7 +1393,7 @@ const plants: Plant[] = [
       en: 'Harvest when the lower third of the florets are open. Flower spikes of 30-50 cm above foliage. Vase life 5-7 days. Adds height and texture to arrangements.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Centaurea cyanus 'Ball Mix' ─────────────────────────────────
@@ -1437,7 +1437,7 @@ const plants: Plant[] = [
       en: 'Harvest when flowers are just fully open. Double flowers last longer than singles. Vase life 5-7 days. Also dries excellently, retaining colour. Cut to the third leaf pair for regrowth.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Phalaris canariensis ────────────────────────────────────────
@@ -1470,7 +1470,7 @@ const plants: Plant[] = [
       en: 'Harvest when plumes are still green for the best colour, or let them ripen to straw-yellow. Excellent dried flower. Fresh vase life 7-10 days. Adds texture and movement to bouquets.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Nigella damascena 'Persian Jewels Mix' ─────────────────────
@@ -1503,7 +1503,7 @@ const plants: Plant[] = [
       en: 'Harvest flowers when they have just opened. The inflated seed pods are also highly decorative in fresh and dried arrangements. Flower vase life 5-7 days. Seed pods dry excellently.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Lunaria annua ──────────────────────────────────────────────
@@ -1542,7 +1542,7 @@ const plants: Plant[] = [
       en: 'The translucent, silvery seed pods ("pennies") are the real attraction. Harvest whole stems when seed pods turn brown. Peel off the outer casings to reveal the silvery membrane. Lasts indefinitely as a dried flower.',
     },
     sun: 'partial-shade',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Dipsacus fullonum ──────────────────────────────────────────
@@ -1581,7 +1581,7 @@ const plants: Plant[] = [
       en: 'Harvest for dried arrangements when the flower heads start losing colour and become drier. The egg-shaped heads are highly decorative when dried. Can also be dyed or spray-painted. Lasts indefinitely as a dried flower.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Scabiosa stellata 'Drumstick' ──────────────────────────────
@@ -1625,7 +1625,7 @@ const plants: Plant[] = [
       en: 'Let flowers fade and harvest the seed heads when fully formed and papery. The spherical, bronze seed heads are the real attraction. Excellent dried flower, lasts for months. Fresh vase life 7-10 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Cosmos bipinnatus 'Apricot Lemonade' ───────────────────────
@@ -1664,7 +1664,7 @@ const plants: Plant[] = [
       en: 'Harvest at the "cracked bud" stage. Unique apricot-lemon yellow colour that is rare in cosmos. Vase life 5-7 days. The more you cut, the more flowers you get.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Amberboa moschata 'Rosy Lilac' ─────────────────────────────
@@ -1708,7 +1708,7 @@ const plants: Plant[] = [
       en: 'Harvest when flowers are just fully open. Lovely musky fragrance. Vase life 5-7 days. Fluffy, cornflower-like blooms in soft rosy lilac. Cut regularly for more flowers.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 
   // ─── Phacelia tanacetifolia ──────────────────────────────────────
@@ -1741,7 +1741,7 @@ const plants: Plant[] = [
       en: 'Limited use as cut flower, but the curling lavender-blue flower spikes are decorative in wild-style bouquets. Harvest when the first florets on the spike are open. Vase life 3-5 days.',
     },
     sun: 'full-sun',
-    verified: false,
+    status: 'unverified',
   },
 ];
 

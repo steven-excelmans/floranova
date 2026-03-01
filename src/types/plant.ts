@@ -35,6 +35,8 @@ export interface PlantColor {
   hex: string;
 }
 
+export type PlantStatus = 'pending' | 'unverified' | 'verified';
+
 export type CareConditionType = 'days' | 'height' | 'leaves' | 'temperature' | 'date' | 'custom';
 
 export interface CareStep {
@@ -76,5 +78,13 @@ export interface Plant {
   minDistanceCm: number;
   stemTips: BilingualText | null;
   sun: SunRequirement;
-  verified: boolean;
+  status: PlantStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  nameCorrections?: {
+    originalSpecies: string;
+    originalVariety: string;
+    correctedSpecies: string;
+    correctedVariety: string;
+  };
 }

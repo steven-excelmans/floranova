@@ -1,47 +1,61 @@
 <template>
   <q-page class="catalog-page">
-    <!-- Content area -->
     <div class="content">
-      <!-- Info bar: counts + calendar legend -->
+      <!-- Info bar: counts + legend + filter toggle -->
       <div class="info-bar">
         <div class="info-counts">
           <div class="count-item">
-            <svg class="count-icon" viewBox="0 0 24 24" fill="none" stroke="var(--moss)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="2.5"/>
-              <ellipse cx="12" cy="6" rx="2.2" ry="4"/>
-              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(72 12 12)"/>
-              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(144 12 12)"/>
-              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(216 12 12)"/>
-              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(288 12 12)"/>
-            </svg>
-            <span class="count-num">{{ totalPlants }}</span>
+            <span class="material-icons-outlined count-icon">eco</span>
+            <span class="count-num">{{ visibleGroups.size }}</span>
           </div>
           <div class="count-item">
-            <svg class="count-icon" viewBox="0 0 24 24" fill="none" stroke="var(--moss)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 8C17 8 21 4 21 3C21 3 17 3 14 5C11 7 7 12 7 16C7 18.5 8 21 12 21C16 21 17 18 17 16C17 13 14 10 12 9"/>
-              <path d="M7 16L3 20"/>
-              <path d="M10 13L7 10"/>
-              <path d="M13 15L11 18"/>
-            </svg>
-            <span class="count-num">{{ visibleGroups.size }}</span>
+            <span class="material-icons-outlined count-icon">local_florist</span>
+            <span class="count-num">{{ totalPlants }}</span>
           </div>
         </div>
 
-        <div class="info-legend">
-          <div class="legend-dot-group">
-            <span class="legend-dot" style="background: var(--cal-indoor);" />
-            <span class="legend-label">{{ t('catalog.calIndoor') }}</span>
+        <div class="info-right">
+          <div class="info-legend">
+            <div class="legend-dot-group">
+              <span class="legend-dot" style="background: var(--cal-indoor);" />
+              <span class="legend-label">{{ t('catalog.calIndoor') }}</span>
+            </div>
+            <div class="legend-dot-group">
+              <span class="legend-dot" style="background: var(--cal-cold);" />
+              <span class="legend-label">{{ t('catalog.calColdFrame') }}</span>
+            </div>
+            <div class="legend-dot-group">
+              <span class="legend-dot" style="background: var(--cal-outdoor);" />
+              <span class="legend-label">{{ t('catalog.calOutdoor') }}</span>
+            </div>
           </div>
-          <div class="legend-dot-group">
-            <span class="legend-dot" style="background: var(--cal-cold);" />
-            <span class="legend-label">{{ t('catalog.calColdFrame') }}</span>
-          </div>
-          <div class="legend-dot-group">
-            <span class="legend-dot" style="background: var(--cal-outdoor);" />
-            <span class="legend-label">{{ t('catalog.calOutdoor') }}</span>
-          </div>
+
+          <button
+            class="filter-toggle"
+            :class="{ 'filter-toggle--active': filterOpen, 'filter-toggle--has-filter': plantStore.hasActiveFilter }"
+            @click="filterOpen = !filterOpen"
+          >
+            <span class="material-icons-outlined">tune</span>
+            <span v-if="plantStore.hasActiveFilter" class="filter-toggle__dot" />
+          </button>
         </div>
       </div>
+
+      <!-- Inline collapsible filters -->
+      <Transition name="filter-collapse">
+        <div v-if="filterOpen" class="filter-panel">
+          <PlantFilters
+            :search="plantStore.search"
+            :type-filter="plantStore.typeFilter"
+            :sun-filter="plantStore.sunFilter"
+            :stock-only="plantStore.stockOnly"
+            @update:search="plantStore.search = $event"
+            @update:type-filter="plantStore.typeFilter = $event"
+            @update:sun-filter="plantStore.sunFilter = $event"
+            @update:stock-only="plantStore.stockOnly = $event"
+          />
+        </div>
+      </Transition>
 
       <!-- Empty state -->
       <div v-if="visibleGroups.size === 0" class="empty-state">
@@ -77,17 +91,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { useStockStore } from 'src/stores/stock-store';
 import PlantCard from 'src/components/catalog/PlantCard.vue';
+import PlantFilters from 'src/components/catalog/PlantFilters.vue';
 
 const { t } = useI18n();
 const router = useRouter();
 const plantStore = usePlantStore();
 const stockStore = useStockStore();
+
+const filterOpen = ref(false);
 
 const visibleGroups = computed(() => {
   if (!plantStore.stockOnly) return plantStore.groupedBySpecies;
@@ -134,7 +151,7 @@ const totalPlants = computed(() => {
   }
 }
 
-// ── Info bar (counts + legend) ──
+// ── Info bar (counts + legend + filter) ──
 .info-bar {
   display: flex;
   align-items: center;
@@ -155,8 +172,8 @@ const totalPlants = computed(() => {
 }
 
 .count-icon {
-  width: 18px;
-  height: 18px;
+  font-size: 17px;
+  color: var(--moss);
   opacity: 0.45;
 }
 
@@ -165,6 +182,12 @@ const totalPlants = computed(() => {
   font-weight: 700;
   color: var(--deep-brown);
   line-height: 1;
+}
+
+.info-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .info-legend {
@@ -191,6 +214,89 @@ const totalPlants = computed(() => {
   color: var(--muted);
   font-weight: 500;
   line-height: 1;
+}
+
+// ── Filter toggle button ──
+.filter-toggle {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: all 0.25s ease;
+  padding: 0;
+  flex-shrink: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  .material-icons-outlined {
+    font-size: 16px;
+    color: inherit;
+  }
+
+  &:hover {
+    border-color: var(--clay-light);
+    color: var(--deep-brown);
+  }
+
+  &--active {
+    background: var(--deep-brown);
+    border-color: var(--deep-brown);
+    color: var(--warm-white);
+
+    &:hover {
+      background: var(--deep-brown);
+      border-color: var(--deep-brown);
+      color: var(--warm-white);
+    }
+  }
+
+  &--has-filter:not(.filter-toggle--active) {
+    border-color: var(--clay);
+    color: var(--clay);
+  }
+}
+
+.filter-toggle__dot {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clay);
+  border: 2px solid var(--sand);
+}
+
+// ── Inline filter panel ──
+.filter-panel {
+  background: var(--warm-white);
+  border-radius: var(--radius-card);
+  margin-bottom: 10px;
+  padding-top: 14px;
+  box-shadow: 0 1px 4px rgba(53, 43, 34, 0.06);
+}
+
+// ── Filter collapse transition ──
+.filter-collapse-enter-active,
+.filter-collapse-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  max-height: 300px;
+}
+
+.filter-collapse-enter-from,
+.filter-collapse-leave-to {
+  max-height: 0;
+  padding-top: 0;
+  margin-bottom: 0;
+  opacity: 0;
 }
 
 // ── Empty state ──

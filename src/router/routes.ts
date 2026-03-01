@@ -22,6 +22,37 @@ const routes: RouteRecordRaw[] = [
         path: 'garden',
         component: () => import('pages/MyGardenPage.vue'),
       },
+      // Admin routes (same layout, admin access checked in MainLayout)
+      {
+        path: 'admin',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/AdminDashboardPage.vue'),
+      },
+      {
+        path: 'admin/plants',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/PlantListPage.vue'),
+      },
+      {
+        path: 'admin/plants/add-names',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/AddNamesPage.vue'),
+      },
+      {
+        path: 'admin/plants/:id',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/PlantEditorPage.vue'),
+      },
+      {
+        path: 'admin/generate-prompt',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/GeneratePromptPage.vue'),
+      },
+      {
+        path: 'admin/import',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/ImportDataPage.vue'),
+      },
     ],
   },
   {

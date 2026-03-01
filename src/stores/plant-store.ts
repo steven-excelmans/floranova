@@ -1,17 +1,61 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { Plant, PlantType, SunRequirement } from 'src/types/plant';
+import { subscribePlants } from 'src/services/plant-service';
 import plantsData from 'src/data/plants';
 
 export const usePlantStore = defineStore('plants', () => {
-  const plants = ref(plantsData);
+  const plants = ref<Plant[]>(plantsData);
   const search = ref('');
   const typeFilter = ref<PlantType | null>(null);
   const sunFilter = ref<SunRequirement | null>(null);
   const stockOnly = ref(false);
+  const firestoreLoaded = ref(false);
+
+  // Subscribe to Firestore plants — merge with static data
+  let unsubscribe: (() => void) | null = null;
+
+  function initFirestore() {
+    if (unsubscribe) return;
+    try {
+      unsubscribe = subscribePlants((firestorePlants) => {
+        // Build a map of Firestore plants by ID (source of truth for overrides)
+        const firestoreMap = new Map(firestorePlants.map((p) => [p.id, p]));
+
+        // Start with static plants, merge Firestore overrides on top
+        const merged = plantsData.map((staticPlant) => {
+          const firestoreVersion = firestoreMap.get(staticPlant.id);
+          if (!firestoreVersion) return staticPlant;
+          // Spread static data first, then Firestore fields on top
+          return { ...staticPlant, ...firestoreVersion };
+        });
+
+        // Add any Firestore-only plants (not in static data)
+        const staticIds = new Set(plantsData.map((p) => p.id));
+        for (const fp of firestorePlants) {
+          if (!staticIds.has(fp.id)) merged.push(fp);
+        }
+
+        plants.value = merged;
+        firestoreLoaded.value = true;
+      });
+    } catch {
+      // Firebase not configured — keep using static data
+    }
+  }
+
+  function cleanup() {
+    unsubscribe?.();
+    unsubscribe = null;
+  }
+
+  // Auto-init when store is used
+  initFirestore();
 
   const filteredPlants = computed(() => {
     return plants.value.filter((plant) => {
+      // Pending plants are admin-only, hide from public views
+      if (plant.status === 'pending') return false;
       if (typeFilter.value && plant.type !== typeFilter.value) return false;
       if (sunFilter.value && plant.sun !== sunFilter.value) return false;
 
@@ -66,11 +110,13 @@ export const usePlantStore = defineStore('plants', () => {
     typeFilter,
     sunFilter,
     stockOnly,
+    firestoreLoaded,
     filteredPlants,
     groupedBySpecies,
     hasActiveFilter,
     getPlantById,
     resetFilters,
+    cleanup,
   };
 });
 
