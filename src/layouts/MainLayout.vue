@@ -4,11 +4,11 @@
       <div class="header__top">
         <div class="header__logo">floranova<span class="header__logo-dot">.</span></div>
         <div class="header__actions">
-          <LanguageToggle />
           <button v-if="isCatalog" class="filter-btn" @click="filterOpen = !filterOpen">
             <span class="material-icons-outlined">tune</span>
             <span v-if="plantStore.hasActiveFilter" class="filter-btn__dot" />
           </button>
+          <LanguageToggle />
         </div>
       </div>
     </q-header>
@@ -32,6 +32,7 @@
           :label="t('nav.catalog')"
           to="/catalog"
           exact
+          @click="scrollTopIfActive('/catalog')"
         />
         <q-route-tab
           name="calendar"
@@ -39,6 +40,7 @@
           :label="t('nav.calendar')"
           to="/calendar"
           exact
+          @click="scrollTopIfActive('/calendar')"
         />
         <q-route-tab
           name="garden"
@@ -46,6 +48,7 @@
           :label="t('nav.garden')"
           to="/garden"
           exact
+          @click="scrollTopIfActive('/garden')"
         />
       </q-tabs>
     </q-footer>
@@ -70,6 +73,12 @@ const activeTab = ref('catalog');
 const filterOpen = ref(false);
 
 const isCatalog = computed(() => route.path === '/catalog');
+
+function scrollTopIfActive(path: string) {
+  if (route.path === path) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
 watch(
   () => route.path,
@@ -137,12 +146,12 @@ watch(
 
 .filter-btn__dot {
   position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 7px;
-  height: 7px;
+  top: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--clay);
-  border: 1.5px solid var(--warm-white);
+  border: 2px solid var(--warm-white);
 }
 </style>

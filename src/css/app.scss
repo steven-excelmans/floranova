@@ -173,18 +173,14 @@ body::before {
   font-family: var(--font-body);
 }
 
-// ── Scrollbar styling ──
-::-webkit-scrollbar {
-  width: 3px;
-}
+// ── Hide scrollbars ──
+* {
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--muted-light);
-  border-radius: 4px;
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari
+  }
 }
 
 // ── Gradient divider utility ──

@@ -11,6 +11,13 @@
           :value="search"
           @input="onSearchInput"
         />
+        <button
+          v-if="search"
+          class="search-clear"
+          @click="$emit('update:search', '')"
+        >
+          <span class="material-icons-outlined">close</span>
+        </button>
       </div>
     </div>
 
@@ -151,7 +158,7 @@ function onStockUpdate() {
 
 .search-input {
   width: 100%;
-  padding: 12px 16px 12px 46px;
+  padding: 12px 40px 12px 46px;
   border: none;
   background: var(--sand);
   border-radius: var(--radius-pill);
@@ -170,6 +177,37 @@ function onStockUpdate() {
   &::placeholder {
     color: var(--muted-light);
     font-weight: 400;
+  }
+}
+
+.search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s ease;
+
+  .material-icons-outlined {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  &:hover {
+    background: var(--muted-light);
+
+    .material-icons-outlined {
+      color: var(--warm-white);
+    }
   }
 }
 

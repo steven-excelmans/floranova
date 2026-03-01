@@ -21,17 +21,24 @@
 
     <!-- Info -->
     <div class="plant-info">
-      <div class="plant-name">{{ displayName }}</div>
-      <div class="plant-latin">{{ plant.latinName }}</div>
+      <!-- Block: Title + type icon -->
+      <div class="block-title">
+        <div class="title-text">
+          <div class="plant-name">{{ displayName }}</div>
+          <div class="plant-latin">{{ plant.latinName }}</div>
+        </div>
+        <div class="type-icon" :class="plant.type">
+          <span class="material-icons-outlined">{{ plantIcon }}</span>
+        </div>
+      </div>
 
-      <PlantTypeBadge :type="plant.type" />
-
+      <!-- Block: Sun requirement -->
       <div class="plant-sun">
         <span class="material-icons-outlined">{{ sunIcon }}</span>
         {{ t(`plant.${plant.sun}`) }}
       </div>
 
-      <!-- Mini calendar: 12 bars (Jan–Dec) -->
+      <!-- Block: Mini calendar -->
       <div class="plant-calendar">
         <div
           v-for="month in 12"
@@ -41,27 +48,28 @@
         />
       </div>
 
-      <!-- Color dots -->
-      <div v-if="plant.colors.length" class="plant-colors">
-        <span
-          v-for="color in plant.colors.slice(0, 6)"
-          :key="color.name"
-          class="color-dot"
-          :class="{ 'is-light': isLight(color.hex) }"
-          :style="{ background: color.hex }"
-          :title="color.name"
-        />
-        <span v-if="plant.colors.length > 6" class="color-more">
-          +{{ plant.colors.length - 6 }}
-        </span>
-      </div>
+      <!-- Colors + Stock (same line) -->
+      <div class="colors-stock-row">
+        <div v-if="plant.colors.length" class="plant-colors">
+          <span
+            v-for="color in plant.colors.slice(0, 6)"
+            :key="color.name"
+            class="color-dot"
+            :class="{ 'is-light': isLight(color.hex) }"
+            :style="{ background: color.hex }"
+            :title="color.name"
+          />
+          <span v-if="plant.colors.length > 6" class="color-more">
+            +{{ plant.colors.length - 6 }}
+          </span>
+        </div>
 
-      <!-- Stock badge -->
-      <div class="stock-badge" @click.stop="$emit('toggle-stock', plant.id)">
-        <span class="stock-leaf" :class="inStock ? 'in-stock' : 'out-of-stock'" />
-        <span class="stock-text" :class="inStock ? 'in-stock' : 'out-of-stock'">
-          {{ inStock ? t('stock.inStock') : t('stock.notInStock') }}
-        </span>
+        <div class="stock-badge" @click.stop="$emit('toggle-stock', plant.id)">
+          <span class="stock-leaf" :class="inStock ? 'in-stock' : 'out-of-stock'" />
+          <span class="stock-text" :class="inStock ? 'in-stock' : 'out-of-stock'">
+            {{ inStock ? t('stock.inStock') : t('stock.notInStock') }}
+          </span>
+        </div>
       </div>
     </div>
   </article>
@@ -72,7 +80,6 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Plant } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
-import PlantTypeBadge from 'src/components/shared/PlantTypeBadge.vue';
 
 const props = defineProps<{
   plant: Plant;
@@ -184,9 +191,7 @@ function calBarClasses(month: number): Record<string, boolean> {
 // ── Image ──
 .plant-img-wrap {
   width: 110px;
-  height: 130px;
   flex-shrink: 0;
-  align-self: flex-start;
   border-radius: 16px 12px 16px 12px;
   overflow: hidden;
   position: relative;
@@ -194,6 +199,8 @@ function calBarClasses(month: number): Record<string, boolean> {
 }
 
 .plant-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -235,8 +242,22 @@ function calBarClasses(month: number): Record<string, boolean> {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 2px 0;
+  gap: 12px;
+}
+
+// ── Block: Title + type icon ──
+.block-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
 .plant-name {
@@ -254,10 +275,37 @@ function calBarClasses(month: number): Record<string, boolean> {
   font-style: italic;
   color: var(--muted);
   line-height: 1.2;
-  margin-top: -1px;
 }
 
-// ── Sun requirement ──
+.type-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: 15px;
+  }
+
+  &.flower {
+    background: var(--flower-bg);
+    color: var(--flower);
+  }
+
+  &.herb {
+    background: var(--herb-bg);
+    color: var(--herb);
+  }
+
+  &.vegetable {
+    background: var(--veg-bg);
+    color: var(--veg);
+  }
+}
+
 .plant-sun {
   display: flex;
   align-items: center;
@@ -276,14 +324,13 @@ function calBarClasses(month: number): Record<string, boolean> {
 .plant-calendar {
   display: flex;
   gap: 2.5px;
-  margin-top: 3px;
   align-items: center;
 }
 
 .cal-bar {
   flex: 1;
-  height: 3px;
-  border-radius: 1.5px;
+  height: 4px;
+  border-radius: 2px;
   background: var(--cal-empty);
 
   &.indoor {
@@ -311,11 +358,17 @@ function calBarClasses(month: number): Record<string, boolean> {
   }
 }
 
-// ── Color dots ──
+// ── Colors + Stock row ──
+.colors-stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .plant-colors {
   display: flex;
   gap: 5px;
-  margin-top: 3px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -348,7 +401,7 @@ function calBarClasses(month: number): Record<string, boolean> {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 2px;
+  flex-shrink: 0;
   cursor: pointer;
 }
 

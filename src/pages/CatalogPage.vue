@@ -2,25 +2,44 @@
   <q-page class="catalog-page">
     <!-- Content area -->
     <div class="content">
-      <!-- Result count -->
-      <div class="result-count">
-        <strong>{{ totalPlants }}</strong> {{ t('catalog.plants') }} {{ t('catalog.in') }}
-        <strong>{{ visibleGroups.size }}</strong> {{ t('catalog.species') }}
-      </div>
+      <!-- Info bar: counts + calendar legend -->
+      <div class="info-bar">
+        <div class="info-counts">
+          <div class="count-item">
+            <svg class="count-icon" viewBox="0 0 24 24" fill="none" stroke="var(--moss)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="2.5"/>
+              <ellipse cx="12" cy="6" rx="2.2" ry="4"/>
+              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(72 12 12)"/>
+              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(144 12 12)"/>
+              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(216 12 12)"/>
+              <ellipse cx="12" cy="6" rx="2.2" ry="4" transform="rotate(288 12 12)"/>
+            </svg>
+            <span class="count-num">{{ totalPlants }}</span>
+          </div>
+          <div class="count-item">
+            <svg class="count-icon" viewBox="0 0 24 24" fill="none" stroke="var(--moss)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 8C17 8 21 4 21 3C21 3 17 3 14 5C11 7 7 12 7 16C7 18.5 8 21 12 21C16 21 17 18 17 16C17 13 14 10 12 9"/>
+              <path d="M7 16L3 20"/>
+              <path d="M10 13L7 10"/>
+              <path d="M13 15L11 18"/>
+            </svg>
+            <span class="count-num">{{ visibleGroups.size }}</span>
+          </div>
+        </div>
 
-      <!-- Calendar legend -->
-      <div class="cal-legend">
-        <div class="cal-legend-item">
-          <span class="cal-legend-bar" style="background: var(--cal-indoor);" />
-          {{ t('catalog.calIndoor') }}
-        </div>
-        <div class="cal-legend-item">
-          <span class="cal-legend-bar" style="background: var(--cal-cold);" />
-          {{ t('catalog.calColdFrame') }}
-        </div>
-        <div class="cal-legend-item">
-          <span class="cal-legend-bar" style="background: var(--cal-outdoor);" />
-          {{ t('catalog.calOutdoor') }}
+        <div class="info-legend">
+          <div class="legend-dot-group">
+            <span class="legend-dot" style="background: var(--cal-indoor);" />
+            <span class="legend-label">{{ t('catalog.calIndoor') }}</span>
+          </div>
+          <div class="legend-dot-group">
+            <span class="legend-dot" style="background: var(--cal-cold);" />
+            <span class="legend-label">{{ t('catalog.calColdFrame') }}</span>
+          </div>
+          <div class="legend-dot-group">
+            <span class="legend-dot" style="background: var(--cal-outdoor);" />
+            <span class="legend-label">{{ t('catalog.calOutdoor') }}</span>
+          </div>
         </div>
       </div>
 
@@ -115,41 +134,63 @@ const totalPlants = computed(() => {
   }
 }
 
-// ── Result count ──
-.result-count {
-  font-size: 12px;
-  color: var(--muted);
-  padding: 4px 4px 2px;
-  font-weight: 400;
-
-  strong {
-    font-weight: 600;
-    color: var(--deep-brown);
-  }
-}
-
-// ── Calendar legend ──
-.cal-legend {
+// ── Info bar (counts + legend) ──
+.info-bar {
   display: flex;
-  gap: 14px;
-  padding: 6px 4px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 4px 10px;
 }
 
-.cal-legend-item {
+.info-counts {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.count-item {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
-  color: var(--muted);
-  font-weight: 500;
-  letter-spacing: 0.2px;
 }
 
-.cal-legend-bar {
-  width: 10px;
-  height: 3px;
-  border-radius: 1.5px;
+.count-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.45;
+}
+
+.count-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--deep-brown);
+  line-height: 1;
+}
+
+.info-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   flex-shrink: 0;
+}
+
+.legend-label {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1;
 }
 
 // ── Empty state ──
@@ -174,14 +215,14 @@ const totalPlants = computed(() => {
 
 // ── Species groups ──
 .species-group {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .species-header {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  padding: 14px 4px 10px;
+  padding: 0 4px;
 }
 
 .species-name {
