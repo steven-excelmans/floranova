@@ -38,7 +38,12 @@
     </q-header>
 
     <q-page-container>
-      <template v-if="isAdminSection && !isAdmin">
+      <template v-if="isAdminSection && authLoading">
+        <q-page class="admin-loading">
+          <q-spinner-dots color="primary" size="40px" />
+        </q-page>
+      </template>
+      <template v-else-if="isAdminSection && !isAdmin">
         <q-page class="admin-denied">
           <div class="admin-denied__inner">
             <span class="material-icons-outlined admin-denied__icon">lock</span>
@@ -117,8 +122,7 @@ const appNavItems = computed(() => [
 const adminNavItems = computed(() => [
   { to: '/admin', icon: 'dashboard', label: t('admin.dashboard') },
   { to: '/admin/plants', icon: 'eco', label: t('admin.plants') },
-  { to: '/admin/plants/add-names', icon: 'add_circle', label: t('admin.addNames') },
-  { to: '/admin/generate-prompt', icon: 'auto_awesome', label: t('admin.generatePrompt') },
+  { to: '/admin/prompt', icon: 'auto_awesome', label: t('admin.prompt') },
   { to: '/admin/import', icon: 'upload', label: t('admin.import') },
 ]);
 
@@ -278,6 +282,14 @@ function handleSignIn() {
 
 .browser-nav__icon {
   font-size: 16px;
+}
+
+/* ── Admin loading ── */
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
 }
 
 /* ── Admin denied ── */

@@ -7,16 +7,22 @@
     <!-- Image -->
     <div class="plant-img-wrap">
       <img
-        v-if="plant.images.length > 0"
-        :src="plant.images[0]"
+        v-if="cover"
+        :src="cover.url"
         :alt="displayName"
         class="plant-img"
         loading="lazy"
+        :style="cover.thumbFocalPoint
+          ? { objectPosition: `${cover.thumbFocalPoint.x}% ${cover.thumbFocalPoint.y}%` }
+          : {}"
         @error="onImgError"
       />
-      <div v-if="imgError || plant.images.length === 0" class="plant-img-placeholder">
+      <div v-if="imgError || !cover" class="plant-img-placeholder">
         <span class="material-icons-outlined">{{ plantIcon }}</span>
       </div>
+      <span v-if="isFavorite" class="fav-badge">
+        <span class="material-icons-outlined">favorite</span>
+      </span>
     </div>
 
     <!-- Info -->
@@ -24,8 +30,10 @@
       <!-- Block: Title + type icon -->
       <div class="block-title">
         <div class="title-text">
-          <div class="plant-name">{{ displayName }}</div>
-          <div class="plant-latin">{{ plant.latinName }}</div>
+          <div class="plant-name">{{ displayName }} <span v-if="plant.variety" class="plant-variety">'{{ plant.variety }}'</span></div>
+          <div class="plant-sub">
+            <span class="plant-latin">{{ plant.latinName }}</span>
+          </div>
         </div>
         <div class="type-icon" :class="plant.type">
           <span class="material-icons-outlined">{{ plantIcon }}</span>
@@ -45,13 +53,36 @@
       </div>
 
       <!-- Block: Mini calendar -->
-      <div class="plant-calendar">
-        <div
-          v-for="month in 12"
-          :key="month"
-          class="cal-bar"
-          :class="calBarClasses(month)"
-        />
+      <div class="plant-calendar-group">
+        <!-- Sowing row -->
+        <div class="cal-row">
+          <div class="cal-row__label">
+            <svg v-if="isTuber" class="cal-svg-icon tuber-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C6.5 3.5 4 6 4 9c0 2.2 1.8 3.5 4 3.5s4-1.3 4-3.5c0-3-2.5-5.5-4-5.5z"/><path d="M8 5.5c-.8 1.2-1.2 2.5-1.2 3.8" fill="none" stroke="white" stroke-width="0.5" opacity="0.3"/><path d="M7.2 3.8C7 2.8 7.3 1.5 8 1c.7.5 1 1.8.8 2.8" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 12.5c.2.5.2 1 .1 1.3M8 12.5v1.3M9.5 12.5c-.2.5-.2 1-.1 1.3" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/></svg>
+            <svg v-else class="cal-svg-icon seed-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1C8 1 5 5 5 9c0 1.66 1.34 3 3 3s3-1.34 3-3C11 5 8 1 8 1z"/><path d="M8 5.5v4" stroke="white" stroke-width="0.8" fill="none" opacity="0.4"/></svg>
+          </div>
+          <div class="cal-row__bars">
+            <div
+              v-for="month in 12"
+              :key="'sow-' + month"
+              class="cal-bar"
+              :class="{ sowing: isSowingMonth(month) }"
+            />
+          </div>
+        </div>
+        <!-- Bloom/produce row -->
+        <div v-if="hasBloomPeriod" class="cal-row">
+          <div class="cal-row__label cal-row__label--bloom">
+            <span class="material-icons-outlined">{{ bloomIcon }}</span>
+          </div>
+          <div class="cal-row__bars">
+            <div
+              v-for="month in 12"
+              :key="'bloom-' + month"
+              class="cal-bar"
+              :class="{ bloom: inRange(month, plant.calendar.harvestPeriod) }"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Colors + Stock (same line) -->
@@ -85,11 +116,13 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Plant } from 'src/types/plant';
+import { getCardPreviewImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
 
 const props = defineProps<{
   plant: Plant;
   inStock: boolean;
+  isFavorite?: boolean;
 }>();
 
 defineEmits<{
@@ -100,7 +133,16 @@ defineEmits<{
 const { t } = useI18n();
 const { localize } = useLocale();
 
-const displayName = computed(() => localize(props.plant.name));
+const cover = computed(() => getCardPreviewImage(props.plant.images));
+
+const displayName = computed(() => {
+  const full = localize(props.plant.name);
+  // Strip variety from display name since we show it separately
+  if (props.plant.variety && full.endsWith(props.plant.variety)) {
+    return full.slice(0, -props.plant.variety.length).trimEnd();
+  }
+  return full;
+});
 const imgError = ref(false);
 
 function onImgError() {
@@ -114,6 +156,19 @@ const plantIconMap: Record<string, string> = {
 };
 
 const plantIcon = computed(() => plantIconMap[props.plant.type] ?? 'local_florist');
+const isTuber = computed(() => props.plant.propagation === 'tuber');
+
+const bloomIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'nutrition',
+  vegetable: 'nutrition',
+};
+
+const bloomIcon = computed(() => bloomIconMap[props.plant.type] ?? 'local_florist');
+
+const hasBloomPeriod = computed(() =>
+  props.plant.calendar.harvestPeriod && props.plant.calendar.harvestPeriod.length > 0
+);
 
 const sunIconMap: Record<string, string> = {
   'full-sun': 'light_mode',
@@ -131,33 +186,16 @@ function isLight(hex: string): boolean {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.85;
 }
 
-/**
- * Determine CSS classes for a given month bar (1-based).
- * Calendar fields: indoorSowing [start, end], coldGreenhouse [start, end], outdoor [start, end]
- * MonthRange is [startMonth, endMonth] (1-indexed, inclusive) or null.
- */
-function inRange(month: number, range: [number, number] | null): boolean {
+function inRange(month: number, range: number[] | null): boolean {
   if (!range) return false;
-  const [start, end] = range;
-  // Handle ranges that wrap across year boundary (e.g. [11, 2])
-  if (start <= end) return month >= start && month <= end;
-  return month >= start || month <= end;
+  return range.includes(month);
 }
 
-function calBarClasses(month: number): Record<string, boolean> {
+function isSowingMonth(month: number): boolean {
   const cal = props.plant.calendar;
-  const isIndoor = inRange(month, cal.indoorSowing);
-  const isCold = inRange(month, cal.coldGreenhouse);
-  const isOutdoor = inRange(month, cal.outdoor);
-
-  return {
-    indoor: isIndoor && !isCold && !isOutdoor,
-    cold: isCold && !isIndoor && !isOutdoor,
-    outdoor: isOutdoor && !isIndoor && !isCold,
-    'indoor-cold': isIndoor && isCold && !isOutdoor,
-    'cold-outdoor': isCold && isOutdoor && !isIndoor,
-    'indoor-outdoor': isIndoor && isOutdoor && !isCold,
-  };
+  return inRange(month, cal.indoorSowing)
+    || inRange(month, cal.coldGreenhouse)
+    || inRange(month, cal.outdoor);
 }
 </script>
 
@@ -202,6 +240,26 @@ function calBarClasses(month: number): Record<string, boolean> {
   overflow: hidden;
   position: relative;
   background: var(--sand);
+}
+
+.fav-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(254, 252, 247, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+
+  .material-icons-outlined {
+    font-size: 12px;
+    color: var(--flower);
+  }
 }
 
 .plant-img {
@@ -275,12 +333,21 @@ function calBarClasses(month: number): Record<string, boolean> {
   letter-spacing: -0.1px;
 }
 
-.plant-latin {
-  font-family: var(--font-body);
+.plant-sub {
   font-size: 12px;
-  font-style: italic;
-  color: var(--muted);
   line-height: 1.2;
+  color: var(--muted);
+}
+
+.plant-latin {
+  font-style: italic;
+}
+
+.plant-variety {
+  font-weight: 400;
+  color: var(--muted-light);
+  font-style: italic;
+  font-size: 13px;
 }
 
 .type-icon {
@@ -352,10 +419,48 @@ function calBarClasses(month: number): Record<string, boolean> {
 }
 
 // ── Mini calendar ──
-.plant-calendar {
+.plant-calendar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cal-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.cal-row__label {
+  width: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .cal-svg-icon {
+    width: 10px;
+    height: 10px;
+
+    &.seed-icon {
+      color: var(--muted-light);
+    }
+
+    &.tuber-icon {
+      color: var(--tuber);
+    }
+  }
+
+  &--bloom .material-icons-outlined {
+    font-size: 10px;
+    color: var(--muted-light);
+  }
+}
+
+.cal-row__bars {
+  flex: 1;
   display: flex;
   gap: 2.5px;
-  align-items: center;
 }
 
 .cal-bar {
@@ -364,28 +469,13 @@ function calBarClasses(month: number): Record<string, boolean> {
   border-radius: 2px;
   background: var(--cal-empty);
 
-  &.indoor {
-    background: var(--cal-indoor);
+  &.sowing {
+    background: var(--moss);
+    opacity: 0.55;
   }
 
-  &.cold {
-    background: var(--cal-cold);
-  }
-
-  &.outdoor {
-    background: var(--cal-outdoor);
-  }
-
-  &.indoor-cold {
-    background: linear-gradient(180deg, var(--cal-indoor) 50%, var(--cal-cold) 50%);
-  }
-
-  &.indoor-outdoor {
-    background: linear-gradient(180deg, var(--cal-indoor) 50%, var(--cal-outdoor) 50%);
-  }
-
-  &.cold-outdoor {
-    background: linear-gradient(180deg, var(--cal-cold) 50%, var(--cal-outdoor) 50%);
+  &.bloom {
+    background: var(--cal-bloom, #D4A0B0);
   }
 }
 

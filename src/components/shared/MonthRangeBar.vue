@@ -21,7 +21,6 @@ const props = defineProps<{
 
 const actionKeyMap: Record<string, string> = {
   indoorSowing: 'indoor',
-  greenhouse: 'greenhouse',
   coldGreenhouse: 'cold',
   outdoor: 'outdoor',
 };
@@ -30,12 +29,7 @@ const actionKey = computed(() => actionKeyMap[props.action] ?? props.action);
 
 function isActive(month: number): boolean {
   if (!props.range) return false;
-  const [start, end] = props.range;
-  if (start <= end) {
-    return month >= start && month <= end;
-  }
-  // Wrap-around (e.g. Nov–Feb)
-  return month >= start || month <= end;
+  return props.range.includes(month);
 }
 </script>
 
@@ -53,10 +47,6 @@ function isActive(month: number): boolean {
   transition: opacity 0.2s;
 
   &--indoor {
-    background: var(--cal-indoor);
-  }
-
-  &--greenhouse {
     background: var(--cal-indoor);
   }
 

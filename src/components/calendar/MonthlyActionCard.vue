@@ -2,8 +2,8 @@
   <div class="monthly-card" @click="$emit('select', plant.id)">
     <div class="monthly-card__avatar">
       <img
-        v-if="plant.images[0]"
-        :src="plant.images[0]"
+        v-if="coverUrl"
+        :src="coverUrl"
         :alt="displayName"
         loading="lazy"
       />
@@ -22,10 +22,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Plant } from 'src/types/plant';
+import { getCoverImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
 import PlantTypeBadge from 'src/components/shared/PlantTypeBadge.vue';
 
 const props = defineProps<{ plant: Plant }>();
+const coverUrl = computed(() => getCoverImage(props.plant.images)?.url ?? null);
 defineEmits<{ select: [id: string] }>();
 
 const { localize } = useLocale();

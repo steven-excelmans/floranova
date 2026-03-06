@@ -14,9 +14,9 @@
           <span class="material-icons-outlined">close</span>
         </button>
       </div>
-      <router-link to="/admin/plants/add-names" class="btn-add">
+      <button class="btn-add" @click="showSheet = true">
         <span class="material-icons-outlined">add</span>
-      </router-link>
+      </button>
     </div>
 
     <!-- Status filters -->
@@ -43,7 +43,7 @@
         v-for="plant in filteredPlants"
         :key="plant.id"
         class="plant-row"
-        @click="$router.push(`/admin/plants/${plant.id}`)"
+        @click="editPlantId = plant.id; showEditDialog = true"
       >
         <div class="type-icon" :class="plant.type">
           <span class="material-icons-outlined">{{ typeIcon(plant.type) }}</span>
@@ -81,6 +81,12 @@
       </div>
     </div>
 
+    <!-- Add Plants bottom sheet -->
+    <AddPlantsSheet v-model="showSheet" />
+
+    <!-- Plant Edit Dialog -->
+    <PlantEditDialog v-model="showEditDialog" :plant-id="editPlantId" />
+
     <!-- Delete confirmation dialog -->
     <q-dialog v-model="deleteDialogOpen" persistent>
       <div class="delete-dialog">
@@ -114,6 +120,8 @@ import { usePlantStore } from 'src/stores/plant-store';
 import { updatePlantStatus, deletePlant } from 'src/services/plant-service';
 import { useLocale } from 'src/composables/useLocale';
 import type { Plant, PlantStatus } from 'src/types/plant';
+import AddPlantsSheet from 'src/components/admin/AddPlantsSheet.vue';
+import PlantEditDialog from 'src/components/admin/PlantEditDialog.vue';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -123,6 +131,9 @@ const { localize } = useLocale();
 const searchQuery = ref('');
 const activeFilter = ref<PlantStatus | 'all'>('all');
 const plantToDelete = ref<Plant | null>(null);
+const showSheet = ref(false);
+const showEditDialog = ref(false);
+const editPlantId = ref<string | null>(null);
 
 const deleteDialogOpen = computed({
   get: () => plantToDelete.value !== null,
@@ -182,6 +193,7 @@ async function executeDelete() {
 <style lang="scss" scoped>
 .plants-page {
   padding: 12px 16px 80px;
+  overflow-x: hidden;
 }
 
 // ── Toolbar ──
@@ -240,13 +252,14 @@ async function executeDelete() {
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  border: none;
   background: var(--moss);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
   flex-shrink: 0;
+  cursor: pointer;
   transition: opacity 0.2s ease;
 
   .material-icons-outlined {
@@ -258,11 +271,18 @@ async function executeDelete() {
   }
 }
 
+
 // ── Status filter chips (with colored dots) ──
 .status-filters {
   display: flex;
   gap: 6px;
   margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .status-chip {
@@ -341,7 +361,7 @@ async function executeDelete() {
   transition: background 0.15s ease;
 
   & + & {
-    margin-top: 2px;
+    margin-top: 6px;
   }
 
   &:hover {

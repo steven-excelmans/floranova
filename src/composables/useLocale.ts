@@ -13,6 +13,7 @@ export function useLocale() {
   function setLocale(value: string) {
     locale.value = value;
     localStorage.setItem(STORAGE_KEY, value);
+    document.documentElement.lang = value === 'nl' ? 'nl' : 'en';
   }
 
   function toggleLocale() {

@@ -34,17 +34,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/admin/PlantListPage.vue'),
       },
       {
-        path: 'admin/plants/add-names',
-        meta: { requiresAdmin: true },
-        component: () => import('pages/admin/AddNamesPage.vue'),
-      },
-      {
         path: 'admin/plants/:id',
         meta: { requiresAdmin: true },
         component: () => import('pages/admin/PlantEditorPage.vue'),
       },
       {
-        path: 'admin/generate-prompt',
+        path: 'admin/prompt',
         meta: { requiresAdmin: true },
         component: () => import('pages/admin/GeneratePromptPage.vue'),
       },

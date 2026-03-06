@@ -20,7 +20,7 @@
           :class="{ 'admin-nav__item--active': isActive(item.to) }"
         >
           <span class="material-icons-outlined admin-nav__icon">{{ item.icon }}</span>
-          {{ item.label }}
+          {{ t(item.label) }}
         </router-link>
       </nav>
     </q-header>
@@ -40,23 +40,23 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuth } from 'src/composables/useAuth';
 import LanguageToggle from 'src/components/layout/LanguageToggle.vue';
 import ProfileDropdown from 'src/components/layout/ProfileDropdown.vue';
 
 const route = useRoute();
+const { t } = useI18n();
 const { isAdmin } = useAuth();
 
 const navItems = [
-  { to: '/admin', icon: 'dashboard', label: 'Dashboard' },
-  { to: '/admin/plants', icon: 'eco', label: 'Plants' },
-  { to: '/admin/plants/add-names', icon: 'add_circle', label: 'Add Names' },
-  { to: '/admin/generate-prompt', icon: 'auto_awesome', label: 'Prompt' },
-  { to: '/admin/import', icon: 'upload', label: 'Import' },
+  { to: '/admin', icon: 'dashboard', label: 'admin.dashboard' },
+  { to: '/admin/plants', icon: 'eco', label: 'admin.plants' },
+  { to: '/admin/prompt', icon: 'auto_awesome', label: 'admin.prompt' },
+  { to: '/admin/import', icon: 'upload', label: 'admin.import' },
 ];
 
 function isActive(to: string) {
-  // Find the longest (most specific) matching nav item
   const bestMatch = navItems
     .filter((item) => route.path === item.to || route.path.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0];

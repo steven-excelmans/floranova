@@ -5,8 +5,8 @@
     <div class="plant-name" @click="$emit('select', plant.id)">
       <div class="plant-name__avatar">
         <img
-          v-if="plant.images[0]"
-          :src="plant.images[0]"
+          v-if="coverUrl"
+          :src="coverUrl"
           :alt="displayName"
           loading="lazy"
         />
@@ -35,6 +35,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Plant } from 'src/types/plant';
+import { getCoverImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
 import { isMonthInRange, getCurrentMonth, type CalendarAction } from 'src/composables/useCalendar';
 
@@ -43,6 +44,7 @@ defineEmits<{ select: [id: string] }>();
 
 const { localize } = useLocale();
 const currentMonth = getCurrentMonth();
+const coverUrl = computed(() => getCoverImage(props.plant.images)?.url ?? null);
 
 const displayName = computed(() => localize(props.plant.name));
 

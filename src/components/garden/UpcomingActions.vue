@@ -27,8 +27,8 @@
         <!-- Plant avatar -->
         <div class="upcoming-card__avatar">
           <q-img
-            v-if="event.plant?.images[0]"
-            :src="event.plant.images[0]"
+            v-if="event.plant && getCoverImage(event.plant.images)"
+            :src="getCoverImage(event.plant.images)!.url"
             fit="cover"
             class="upcoming-card__avatar-img"
           >
@@ -65,6 +65,7 @@ import { usePlantStore } from 'src/stores/plant-store';
 import { usePlantingStore } from 'src/stores/planting-store';
 import { buildPlantingTimeline } from 'src/composables/usePlantingTimeline';
 import type { BilingualText, Plant } from 'src/types/plant';
+import { getCoverImage } from 'src/types/plant';
 
 const { t } = useI18n();
 const { localize } = useLocale();

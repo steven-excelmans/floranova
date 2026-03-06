@@ -12,15 +12,17 @@ Plant Data Schema:
     en: string             // English common name
   },
   type: "flower" | "vegetable" | "herb",
+  lifecycle: "annual" | "biennial" | "perennial",
+  propagation: "seed" | "tuber",           // "tuber" for bulbs/tubers (dahlias, gladiolus, etc.)
   calendar: {
-    indoorSowing: [startMonth, endMonth] | null,    // e.g. [3, 4] for March-April
-    greenhouse: [startMonth, endMonth] | null,
-    coldGreenhouse: [startMonth, endMonth] | null,
-    outdoor: [startMonth, endMonth] | null
+    indoorSowing: number[] | null,    // e.g. [3, 4, 5] for March-May (list each month)
+    coldGreenhouse: number[] | null,
+    outdoor: number[] | null,
+    harvestPeriod: number[] | null    // For flowers: bloom period. For vegetables/herbs: harvest period.
   },
   germination: "light" | "dark",
   colors: [{ name: string, hex: string }],          // Flower/leaf colors
-  images: string[],                                  // Wikipedia or public domain URLs
+  images: [{ url: string, isCover?: boolean }] | string[],  // Image URLs (string[] also accepted)
   heightCm: { min: number, max: number } | null,
   sowingDepthMm: number | null,
   germinationDays: { min: number, max: number } | null,
@@ -38,7 +40,7 @@ Plant Data Schema:
     order: number
   }],
   maintenanceNotes: { nl: string, en: string },
-  plantingConditions: ("tray" | "outside-direct" | "p9-pot" | "small-pot" | "big-pot" | "module-tray")[],
+  plantingConditions: ("tray" | "pot" | "outdoor" | "sprout-tray")[],
   minDistanceCm: number,
   stemTips: { nl: string, en: string } | null,      // Only for cut flowers
   sun: "full-sun" | "partial-shade" | "shade",
@@ -92,7 +94,10 @@ ${exampleJson}
 5. Colors should include name and exact hex code
 6. For images, use Wikipedia Commons or other public domain sources
 7. Set status to "unverified" for all plants
-8. Generate the id as a slug from species + variety
+8. For tuber/bulb plants: set propagation to "tuber", germination fields (germination, germinationDays, germinationTempC, seedsPerCell) can be null. Calendar indoorSowing = pre-sprout period, outdoor = planting period.
+9. harvestPeriod: for flowers = bloom period, for vegetables/herbs = harvest period. List the months when the plant blooms or produces harvest.
+10. For microgreens/sprouts (e.g. garden cress): use plantingConditions ["sprout-tray"], indoorSowing year-round [1-12], harvestPeriod year-round [1-12], add a care step for harvest timing.
+11. Generate the id as a slug from species + variety
 
 ## Output Format
 Respond with a JSON array containing the plant objects:

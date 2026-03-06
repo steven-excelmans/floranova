@@ -14,27 +14,38 @@
   <!-- Detail page -->
   <q-page v-else class="detail-page">
 
-    <!-- ── 1. HERO ── -->
-    <div class="hero">
-      <!-- Image or gradient placeholder -->
-      <div class="hero__media">
-        <img
-          v-if="currentImage"
-          :src="currentImage"
-          :alt="displayName"
-          class="hero__img"
-        />
-        <div v-else class="hero__placeholder">
-          <span class="material-icons-outlined hero__placeholder-icon">local_florist</span>
-        </div>
-      </div>
-
-      <!-- Back button -->
-      <button class="hero__back" @click="router.back()">
+    <!-- ── 0. STICKY NAV (JS-driven position) ── -->
+    <div ref="navRef" class="sticky-nav">
+      <button class="sticky-nav__btn" @click="router.back()">
         <span class="material-icons-outlined">arrow_back</span>
       </button>
+      <button
+        class="sticky-nav__btn"
+        :class="{ 'sticky-nav__btn--fav-active': favoritesStore.isFavorite(plant.id) }"
+        @click="favoritesStore.toggleFavorite(plant.id)"
+      >
+        <span class="material-icons-outlined">{{ favoritesStore.isFavorite(plant.id) ? 'favorite' : 'favorite_border' }}</span>
+      </button>
+    </div>
 
-      <!-- Image dots (only when multiple images) -->
+    <!-- ── 1. HERO ── -->
+    <div ref="heroRef" class="hero" @touchstart="onTouchStart" @touchend="onTouchEnd">
+      <img
+        v-if="currentImage"
+        ref="heroImgRef"
+        :src="currentImage.url"
+        :alt="displayName"
+        class="hero__img"
+        :style="currentImage.focalPoint
+          ? { objectPosition: `${currentImage.focalPoint.x}% ${currentImage.focalPoint.y}%` }
+          : {}"
+      />
+      <div v-else class="hero__placeholder">
+        <span class="material-icons-outlined hero__placeholder-icon">local_florist</span>
+      </div>
+      <div class="hero__overlay" />
+
+      <!-- Image dots -->
       <div v-if="plant.images.length > 1" class="hero__dots">
         <button
           v-for="(_, idx) in plant.images"
@@ -46,251 +57,372 @@
       </div>
     </div>
 
-    <!-- ── 2. CONTENT CARD ── -->
-    <div class="content">
-      <div class="content__card">
+    <!-- ── 2. CONTENT SHEET ── -->
+    <div class="sheet">
+      <div class="sheet__handle" />
 
-        <!-- ── 2a. HEADER ── -->
-        <div class="header">
-          <div class="header__top">
-            <h1 class="header__name">{{ displayName }}</h1>
-            <PlantTypeBadge :type="plant.type" class="header__badge" />
-          </div>
-          <p class="header__latin">{{ plant.latinName }}</p>
-          <span v-if="plant.status !== 'verified'" class="header__verification" :class="{ 'header__verification--pending': plant.status === 'pending' }">
-            <span class="material-icons-outlined">info</span>
-            {{ plant.status === 'pending' ? t('plant.pending') : t('plant.notVerified') }}
-          </span>
-        </div>
+      <!-- ── 2a. HEADER ── -->
+      <div class="plant-header">
+        <!-- Badge row: left = verified + stock, right = type icon -->
+        <div class="meta-row">
+          <div class="meta-left">
+            <span v-if="plant.status === 'verified'" class="verified-badge">
+              <span class="material-icons-outlined">verified</span>
+              {{ t('plant.verified') }}
+            </span>
+            <span v-else-if="plant.status === 'pending'" class="status-badge status-badge--pending">
+              <span class="material-icons-outlined">hourglass_empty</span>
+              {{ t('plant.pending') }}
+            </span>
+            <span v-else class="status-badge status-badge--unverified">
+              <span class="material-icons-outlined">info</span>
+              {{ t('plant.notVerified') }}
+            </span>
 
-        <!-- ── 2b. ACTIONS ── -->
-        <div class="actions">
-          <button
-            class="btn btn--stock"
-            :class="{ 'btn--stock-active': stockStore.isInStock(plant.id) }"
-            @click="stockStore.toggleStock(plant.id)"
-          >
-            <span class="material-icons-outlined">{{ stockStore.isInStock(plant.id) ? 'inventory_2' : 'add_box' }}</span>
-            {{ stockStore.isInStock(plant.id) ? t('stock.inStock') : t('stock.notInStock') }}
-          </button>
-
-          <button class="btn btn--plant" @click="showAddPlanting = true">
-            <span class="material-icons-outlined">yard</span>
-            {{ t('plant.plantThis') }}
-          </button>
-        </div>
-
-        <div class="divider" />
-
-        <!-- ── 2c. CALENDAR ── -->
-        <div class="section">
-          <h2 class="section__title">{{ t('plant.calendar') }}</h2>
-
-          <!-- Month labels -->
-          <div class="cal-months">
             <span
-              v-for="m in 12"
-              :key="m"
-              class="cal-months__label"
-              :class="{ 'cal-months__label--current': m === currentMonth }"
+              class="stock-indicator"
+              :class="stockStore.isInStock(plant.id) ? 'stock-indicator--in' : 'stock-indicator--out'"
+              @click.stop="stockStore.toggleStock(plant.id)"
             >
-              {{ shortMonthLabel(m) }}
+              <span class="stock-leaf" />
+              {{ stockStore.isInStock(plant.id) ? t('stock.inStock') : t('stock.notInStock') }}
             </span>
           </div>
 
-          <!-- Indoor sowing row -->
-          <div v-if="plant.calendar.indoorSowing" class="cal-row">
-            <div class="cal-row__label">{{ t('calendar.indoorSowing') }}</div>
-            <MonthRangeBar :range="plant.calendar.indoorSowing" action="indoorSowing" />
+          <div class="type-icon" :class="plant.type">
+            <span class="material-icons-outlined">{{ plantIcon }}</span>
+          </div>
+        </div>
+
+        <!-- Name: species + variety styled like catalog card -->
+        <h1 class="plant-name">
+          {{ displayName }}
+          <span v-if="plant.variety" class="plant-variety">'{{ plant.variety }}'</span>
+        </h1>
+        <p class="plant-latin">{{ plant.latinName }}</p>
+
+        <!-- Color swatches -->
+        <div v-if="plant.colors.length" class="color-row">
+          <span
+            v-for="color in plant.colors"
+            :key="color.name"
+            class="color-dot"
+            :class="{ 'color-dot--light': isLightColor(color.hex) }"
+            :style="{ background: color.hex }"
+            :title="color.name"
+          />
+        </div>
+      </div>
+
+      <!-- ── 2b. QUICK FACTS GRID ── -->
+      <div class="facts-grid">
+        <div v-if="plant.lifecycle" class="fact-cell">
+          <span class="material-icons-outlined">{{ lifecycleIcon }}</span>
+          <span class="fact-label">{{ t('plant.lifecycle') }}</span>
+          <span class="fact-value">{{ t(`plant.${plant.lifecycle}`) }}</span>
+        </div>
+        <div class="fact-cell">
+          <span class="material-icons-outlined">{{ sunIcon }}</span>
+          <span class="fact-label">{{ t('plant.exposure') }}</span>
+          <span class="fact-value">{{ t(`plant.${plant.sun}`) }}</span>
+        </div>
+        <div v-if="plant.heightCm" class="fact-cell">
+          <span class="material-icons-outlined">straighten</span>
+          <span class="fact-label">{{ t('plant.height') }}</span>
+          <span class="fact-value">{{ plant.heightCm.min }}–{{ plant.heightCm.max }} cm</span>
+        </div>
+      </div>
+
+      <!-- ── 2c. TABS ── -->
+      <div class="tabs-wrap">
+        <div class="tabs">
+          <button
+            class="tab"
+            :class="{ 'tab--active': activeTab === 'calendar' }"
+            @click="activeTab = 'calendar'"
+          >
+            {{ t('plant.calendar') }}
+          </button>
+          <button
+            class="tab"
+            :class="{ 'tab--active': activeTab === 'growing' }"
+            @click="activeTab = 'growing'"
+          >
+            {{ t('plant.growing') }}
+          </button>
+          <button
+            class="tab"
+            :class="{ 'tab--active': activeTab === 'care' }"
+            @click="activeTab = 'care'"
+          >
+            {{ t('plant.care') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ====== CALENDAR TAB ====== -->
+      <div v-show="activeTab === 'calendar'" class="tab-panel">
+
+        <!-- Sowing calendar card -->
+        <div v-if="hasCalendarData" class="section-card">
+          <div class="section-title">{{ t('plant.calendar') }}</div>
+
+          <!-- Indoor sowing -->
+          <div v-if="plant.calendar.indoorSowing?.length" class="cal-row">
+            <div class="cal-icon">
+              <span class="material-icons-outlined" style="color: var(--cal-indoor)">home</span>
+            </div>
+            <div class="cal-bars">
+              <div
+                v-for="m in 12"
+                :key="'in-' + m"
+                class="cal-bar"
+                :class="{ 'cal-bar--indoor': inRange(m, plant.calendar.indoorSowing) }"
+              />
+            </div>
           </div>
 
-          <!-- Greenhouse row -->
-          <div v-if="plant.calendar.greenhouse" class="cal-row">
-            <div class="cal-row__label">{{ t('calendar.greenhouse') }}</div>
-            <MonthRangeBar :range="plant.calendar.greenhouse" action="greenhouse" />
+          <!-- Cold greenhouse -->
+          <div v-if="plant.calendar.coldGreenhouse?.length" class="cal-row">
+            <div class="cal-icon">
+              <span class="material-icons-outlined" style="color: var(--cal-cold)">warehouse</span>
+            </div>
+            <div class="cal-bars">
+              <div
+                v-for="m in 12"
+                :key="'cold-' + m"
+                class="cal-bar"
+                :class="{ 'cal-bar--cold': inRange(m, plant.calendar.coldGreenhouse) }"
+              />
+            </div>
           </div>
 
-          <!-- Cold greenhouse row -->
-          <div v-if="plant.calendar.coldGreenhouse" class="cal-row">
-            <div class="cal-row__label">{{ t('calendar.coldGreenhouse') }}</div>
-            <MonthRangeBar :range="plant.calendar.coldGreenhouse" action="coldGreenhouse" />
+          <!-- Outdoor -->
+          <div v-if="plant.calendar.outdoor?.length" class="cal-row">
+            <div class="cal-icon">
+              <span class="material-icons-outlined" style="color: var(--cal-outdoor)">park</span>
+            </div>
+            <div class="cal-bars">
+              <div
+                v-for="m in 12"
+                :key="'out-' + m"
+                class="cal-bar"
+                :class="{ 'cal-bar--outdoor': inRange(m, plant.calendar.outdoor) }"
+              />
+            </div>
           </div>
 
-          <!-- Outdoor row -->
-          <div v-if="plant.calendar.outdoor" class="cal-row">
-            <div class="cal-row__label">{{ t('calendar.outdoor') }}</div>
-            <MonthRangeBar :range="plant.calendar.outdoor" action="outdoor" />
+          <!-- Harvest / Bloom period -->
+          <div v-if="hasHarvestPeriod" class="cal-row">
+            <div class="cal-icon">
+              <span class="material-icons-outlined" style="color: var(--cal-bloom)">{{ bloomIcon }}</span>
+            </div>
+            <div class="cal-bars">
+              <div
+                v-for="m in 12"
+                :key="'bloom-' + m"
+                class="cal-bar"
+                :class="{ 'cal-bar--bloom': inRange(m, plant.calendar.harvestPeriod) }"
+              />
+            </div>
           </div>
 
           <!-- Legend -->
           <div class="cal-legend">
-            <div v-if="plant.calendar.indoorSowing" class="legend-item">
-              <div class="legend-item__bar legend-item__bar--indoor" />
-              {{ t('calendar.indoorSowing') }}
+            <div v-if="plant.calendar.indoorSowing?.length" class="cal-legend-item">
+              <div class="cal-legend-dot" style="background: var(--cal-indoor)" />
+              {{ isTuber ? t('calendar.preSproutIndoors') : t('catalog.calIndoor') }}
             </div>
-            <div v-if="plant.calendar.coldGreenhouse || plant.calendar.greenhouse" class="legend-item">
-              <div class="legend-item__bar legend-item__bar--cold" />
+            <div v-if="plant.calendar.coldGreenhouse?.length" class="cal-legend-item">
+              <div class="cal-legend-dot" style="background: var(--cal-cold)" />
               {{ t('calendar.coldGreenhouse') }}
             </div>
-            <div v-if="plant.calendar.outdoor" class="legend-item">
-              <div class="legend-item__bar legend-item__bar--outdoor" />
-              {{ t('calendar.outdoor') }}
+            <div v-if="plant.calendar.outdoor?.length" class="cal-legend-item">
+              <div class="cal-legend-dot" style="background: var(--cal-outdoor)" />
+              {{ isTuber ? t('calendar.plantOutdoors') : t('catalog.calOutdoor') }}
+            </div>
+            <div v-if="hasHarvestPeriod" class="cal-legend-item">
+              <div class="cal-legend-dot" style="background: var(--cal-bloom)" />
+              {{ plant.type === 'flower' ? t('plant.bloom') : t('plant.harvest') }}
             </div>
           </div>
         </div>
 
-        <div class="divider" />
+        <!-- Planting conditions -->
+        <div v-if="plant.plantingConditions.length" class="section-card">
+          <div class="section-title">{{ t('plant.plantingConditions') }}</div>
+          <div class="conditions-row">
+            <span
+              v-for="cond in plant.plantingConditions"
+              :key="cond"
+              class="condition-chip"
+            >
+              <svg v-if="isPotCondition(cond)" class="condition-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l-1.5 9H8.5L7 10z"/><path d="M6 7h12v3H6z"/></svg>
+              <span v-else class="material-icons-outlined">{{ conditionIcon(cond) }}</span>
+              {{ t(`plant.${cond}`) }}
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <!-- ── 2d. QUICK FACTS ── -->
-        <div class="section">
-          <h2 class="section__title">Details</h2>
-          <div class="facts">
+      <!-- ====== GROWING TAB ====== -->
+      <div v-show="activeTab === 'growing'" class="tab-panel">
 
-            <div v-if="plant.heightCm" class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">straighten</span>
+        <!-- Germination (hidden for tubers) -->
+        <div v-if="!isTuber" class="section-card">
+          <div class="section-title">{{ t('plant.germination') }}</div>
+          <div class="detail-list">
+            <div class="detail-item">
+              <div class="detail-icon">
+                <span class="material-icons-outlined">{{ plant.germination === 'dark' ? 'dark_mode' : 'light_mode' }}</span>
               </div>
-              <div>
-                <div class="fact__label">{{ t('plant.height') }}</div>
-                <div class="fact__value">{{ plant.heightCm.min }}–{{ plant.heightCm.max }} cm</div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.type') }}</div>
+                <div class="detail-text__value">{{ t(`plant.${plant.germination}`) }}</div>
               </div>
             </div>
-
-            <div class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">wb_twilight</span>
-              </div>
-              <div>
-                <div class="fact__label">{{ t('plant.germination') }}</div>
-                <div class="fact__value">{{ t(`plant.${plant.germination}`) }}</div>
-              </div>
-            </div>
-
-            <div v-if="plant.germinationDays" class="fact">
-              <div class="fact__icon">
+            <div v-if="plant.germinationDays" class="detail-item">
+              <div class="detail-icon">
                 <span class="material-icons-outlined">schedule</span>
               </div>
-              <div>
-                <div class="fact__label">{{ t('plant.germinationTime') }}</div>
-                <div class="fact__value">{{ plant.germinationDays.min }}–{{ plant.germinationDays.max }} days</div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.germinationTime') }}</div>
+                <div class="detail-text__value">{{ plant.germinationDays.min }}–{{ plant.germinationDays.max }} {{ t('careCondition.days') }}</div>
               </div>
             </div>
-
-            <div v-if="plant.germinationTempC" class="fact">
-              <div class="fact__icon">
+            <div v-if="plant.germinationTempC" class="detail-item">
+              <div class="detail-icon">
                 <span class="material-icons-outlined">thermostat</span>
               </div>
-              <div>
-                <div class="fact__label">{{ t('plant.germinationTemp') }}</div>
-                <div class="fact__value">{{ plant.germinationTempC.min }}–{{ plant.germinationTempC.max }}°C</div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.germinationTemp') }}</div>
+                <div class="detail-text__value">{{ plant.germinationTempC.min }}–{{ plant.germinationTempC.max }} &deg;C</div>
               </div>
             </div>
-
-            <div class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">content_cut</span>
+            <div v-if="plant.sowingDepthMm" class="detail-item">
+              <div class="detail-icon">
+                <span class="material-icons-outlined">arrow_downward</span>
               </div>
-              <div>
-                <div class="fact__label">{{ t('plant.pinching') }}</div>
-                <div class="fact__value">{{ plant.pinching ? t('plant.pinchingYes') : t('plant.pinchingNo') }}</div>
-              </div>
-            </div>
-
-            <div v-if="plant.seedsPerCell" class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">grass</span>
-              </div>
-              <div>
-                <div class="fact__label">{{ t('plant.seedsPerCell') }}</div>
-                <div class="fact__value">{{ plant.seedsPerCell }} seed{{ plant.seedsPerCell > 1 ? 's' : '' }}</div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.sowingDepth') }}</div>
+                <div class="detail-text__value">{{ plant.sowingDepthMm }} mm</div>
               </div>
             </div>
-
-            <div class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">{{ sunIcon }}</span>
+            <div v-if="plant.seedsPerCell" class="detail-item">
+              <div class="detail-icon">
+                <span class="material-icons-outlined">grain</span>
               </div>
-              <div>
-                <div class="fact__label">{{ t('plant.sun') }}</div>
-                <div class="fact__value">{{ t(`plant.${plant.sun}`) }}</div>
-              </div>
-            </div>
-
-            <div class="fact">
-              <div class="fact__icon">
-                <span class="material-icons-outlined">social_distance</span>
-              </div>
-              <div>
-                <div class="fact__label">{{ t('plant.minDistance') }}</div>
-                <div class="fact__value">{{ plant.minDistanceCm }} cm</div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.seedsPerCell') }}</div>
+                <div class="detail-text__value">{{ plant.seedsPerCell }}</div>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- ── 2e. COLORS ── -->
-        <template v-if="plant.colors.length">
-          <div class="divider" />
-          <div class="section section--compact">
-            <h2 class="section__title">{{ t('plant.colors') }}</h2>
-            <div class="colors">
-              <ColorSquare v-for="color in plant.colors" :key="color.name" :color="color" />
-            </div>
-          </div>
-        </template>
-
-        <!-- ── 2f. POST-GERMINATION CARE ── -->
-        <template v-if="plant.careSteps.length">
-          <div class="divider" />
-          <div class="section">
-            <PostGerminationCare :care-steps="plant.careSteps" />
-          </div>
-        </template>
-
-        <!-- ── 2g. PLANTING CONDITIONS ── -->
-        <template v-if="plant.plantingConditions.length">
-          <div class="divider" />
-          <div class="section section--compact">
-            <h2 class="section__title">{{ t('plant.plantingConditions') }}</h2>
-            <div class="chips">
-              <span
-                v-for="cond in plant.plantingConditions"
-                :key="cond"
-                class="chip"
-              >
-                {{ t(`plant.${cond}`) }}
-              </span>
-            </div>
-          </div>
-        </template>
-
-        <!-- ── 2h. ADDITIONAL TIPS ── -->
-        <template v-if="additionalNotes">
-          <div class="divider" />
-          <div class="section">
-            <h2 class="section__title">{{ t('plant.additionalNotes') }}</h2>
-            <div class="note-box note-box--moss">
-              <p class="note-box__text">{{ additionalNotes }}</p>
-            </div>
-          </div>
-        </template>
-
-        <!-- ── 2i. CUT FLOWER TIPS ── -->
-        <template v-if="stemTipsText">
-          <div class="divider" />
-          <div class="section">
-            <h2 class="section__title">{{ t('plant.stemTips') }}</h2>
-            <div class="note-box note-box--clay">
-              <div class="note-box__label note-box__label--clay">
-                <span class="material-icons-outlined">content_cut</span>
-                Cut flower
+        <!-- Tuber propagation info -->
+        <div v-if="isTuber" class="section-card">
+          <div class="section-title">{{ t('plant.propagation') }}</div>
+          <div class="detail-list">
+            <div class="detail-item">
+              <div class="detail-icon detail-icon--tuber">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C6.5 3.5 4 6 4 9c0 2.2 1.8 3.5 4 3.5s4-1.3 4-3.5c0-3-2.5-5.5-4-5.5z"/><path d="M8 5.5c-.8 1.2-1.2 2.5-1.2 3.8" fill="none" stroke="white" stroke-width="0.5" opacity="0.3"/><path d="M7.2 3.8C7 2.8 7.3 1.5 8 1c.7.5 1 1.8.8 2.8" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 12.5c.2.5.2 1 .1 1.3M8 12.5v1.3M9.5 12.5c-.2.5-.2 1-.1 1.3" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/></svg>
               </div>
-              <p class="note-box__text">{{ stemTipsText }}</p>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.type') }}</div>
+                <div class="detail-text__value">{{ t('plant.tuber') }}</div>
+              </div>
+            </div>
+            <div v-if="plant.sowingDepthMm" class="detail-item">
+              <div class="detail-icon">
+                <span class="material-icons-outlined">arrow_downward</span>
+              </div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.plantingDepth') }}</div>
+                <div class="detail-text__value">{{ plant.sowingDepthMm }} mm</div>
+              </div>
             </div>
           </div>
-        </template>
+        </div>
 
+        <!-- Spacing -->
+        <div v-if="plant.minDistanceCm" class="section-card">
+          <div class="section-title">{{ t('plant.spacing') }}</div>
+          <div class="detail-list">
+            <div class="detail-item">
+              <div class="detail-icon">
+                <span class="material-icons-outlined">swap_horiz</span>
+              </div>
+              <div class="detail-text">
+                <div class="detail-text__label">{{ t('plant.minDistance') }}</div>
+                <div class="detail-text__value">{{ plant.minDistanceCm }} cm</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pinching highlight -->
+        <div v-if="plant.pinching" class="highlight-banner">
+          <div class="highlight-icon">
+            <span class="material-icons-outlined">content_cut</span>
+          </div>
+          <div class="highlight-text">
+            <strong>{{ t('plant.pinchingYes') }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== CARE TAB ====== -->
+      <div v-show="activeTab === 'care'" class="tab-panel">
+
+        <!-- Care steps -->
+        <div v-if="sortedCareSteps.length" class="section-card">
+          <div class="section-title">{{ t('plant.postGerminationCare') }}</div>
+          <div class="care-steps">
+            <div
+              v-for="(step, idx) in sortedCareSteps"
+              :key="step.order"
+              class="care-step"
+            >
+              <div class="step-number">{{ idx + 1 }}</div>
+              <div class="step-content">
+                <div class="step-title">{{ localize(step.action) }}</div>
+                <div class="step-when">{{ localize(step.condition.description) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div v-if="additionalNotes || stemTipsText" class="section-card">
+          <div class="section-title">{{ t('plant.notes') }}</div>
+
+          <div v-if="additionalNotes" class="note-block">
+            <div class="note-block__title">
+              <span class="material-icons-outlined">spa</span>
+              {{ t('plant.maintenance') }}
+            </div>
+            <p class="note-block__text">{{ additionalNotes }}</p>
+          </div>
+
+          <div v-if="additionalNotes && stemTipsText" class="note-divider" />
+
+          <div v-if="stemTipsText" class="note-block">
+            <div class="note-block__title note-block__title--clay">
+              <span class="material-icons-outlined">cut</span>
+              {{ t('plant.stemTips') }}
+            </div>
+            <p class="note-block__text">{{ stemTipsText }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACTION BUTTON ── -->
+      <div class="action-row">
+        <button class="btn-primary" @click="showAddPlanting = true">
+          <span class="material-icons-outlined">add</span>
+          {{ t('plant.addToGarden') }}
+        </button>
       </div>
     </div>
 
@@ -303,61 +435,178 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { useStockStore } from 'src/stores/stock-store';
+import { useFavoritesStore } from 'src/stores/favorites-store';
 import { useLocale } from 'src/composables/useLocale';
-import PlantTypeBadge from 'src/components/shared/PlantTypeBadge.vue';
-import MonthRangeBar from 'src/components/shared/MonthRangeBar.vue';
-import ColorSquare from 'src/components/shared/ColorSquare.vue';
-import PostGerminationCare from 'src/components/detail/PostGerminationCare.vue';
+import { normalizeImage } from 'src/types/plant';
+import { scroll } from 'quasar';
 import AddPlantingDialog from 'src/components/garden/AddPlantingDialog.vue';
+
+const { getScrollTarget, getVerticalScrollPosition } = scroll;
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const plantStore = usePlantStore();
 const stockStore = useStockStore();
+const favoritesStore = useFavoritesStore();
 const { localize } = useLocale();
 
+// ── Plant data ──
 const plant = computed(() =>
   plantStore.getPlantById(route.params.id as string),
 );
 
-const displayName = computed(() =>
-  plant.value ? localize(plant.value.name) : '',
-);
+const displayName = computed(() => {
+  if (!plant.value) return '';
+  const full = localize(plant.value.name);
+  if (plant.value.variety && full.endsWith(plant.value.variety)) {
+    return full.slice(0, -plant.value.variety.length).trimEnd();
+  }
+  return full;
+});
 
+const isTuber = computed(() => plant.value?.propagation === 'tuber');
+
+// ── Image handling ──
 const imageIndex = ref(0);
 
 const currentImage = computed(() => {
   if (!plant.value?.images.length) return null;
-  return plant.value.images[imageIndex.value] ?? plant.value.images[0] ?? null;
+  const raw = plant.value.images[imageIndex.value] ?? plant.value.images[0];
+  return raw ? normalizeImage(raw) : null;
 });
 
+// Touch swipe on hero
+let touchStartX = 0;
+function onTouchStart(e: TouchEvent) {
+  touchStartX = e.touches[0]!.clientX;
+}
+function onTouchEnd(e: TouchEvent) {
+  if (!plant.value) return;
+  const diff = touchStartX - e.changedTouches[0]!.clientX;
+  const maxIdx = plant.value.images.length - 1;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0 && imageIndex.value < maxIdx) imageIndex.value++;
+    if (diff < 0 && imageIndex.value > 0) imageIndex.value--;
+  }
+}
+
+// ── Scroll handling — parallax hero + floating nav ──
+const heroRef = ref<HTMLElement>();
+const heroImgRef = ref<HTMLImageElement>();
+const navRef = ref<HTMLElement>();
+let scrollTarget: Element | Window | null = null;
+
+function onScroll() {
+  if (!scrollTarget) return;
+  const scrollY = getVerticalScrollPosition(scrollTarget);
+
+  // Parallax: counter-translate image so it appears fixed
+  if (heroImgRef.value && heroRef.value) {
+    const heroH = heroRef.value.offsetHeight;
+    if (scrollY < heroH + 100) {
+      heroImgRef.value.style.transform = `translateY(${scrollY}px)`;
+    }
+  }
+
+  // Floating nav: translate down to follow scroll
+  if (navRef.value) {
+    navRef.value.style.transform = `translateY(${scrollY}px)`;
+  }
+}
+
+onMounted(() => {
+  if (heroRef.value) {
+    scrollTarget = getScrollTarget(heroRef.value);
+    scrollTarget.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+});
+
+onUnmounted(() => {
+  if (scrollTarget) {
+    scrollTarget.removeEventListener('scroll', onScroll as EventListener);
+  }
+});
+
+// ── Tabs ──
+const activeTab = ref<'calendar' | 'growing' | 'care'>('calendar');
 const showAddPlanting = ref(false);
 
-// Current month (1–12) for calendar highlight
-const currentMonth = new Date().getMonth() + 1;
-
-// Short single-letter month labels: J F M A M J J A S O N D
-const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-function shortMonthLabel(month: number): string {
-  return MONTH_LABELS[month - 1] ?? '';
-}
+// ── Icon maps ──
+const plantIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'grass',
+  vegetable: 'spa',
+};
+const plantIcon = computed(() => plantIconMap[plant.value?.type ?? ''] ?? 'local_florist');
 
 const sunIconMap: Record<string, string> = {
   'full-sun': 'light_mode',
-  'partial-shade': 'wb_cloudy',
-  shade: 'cloud',
+  'partial-shade': 'contrast',
+  shade: 'wb_cloudy',
 };
+const sunIcon = computed(() => sunIconMap[plant.value?.sun ?? ''] ?? 'light_mode');
 
-const sunIcon = computed(() =>
-  plant.value ? (sunIconMap[plant.value.sun] ?? 'light_mode') : 'light_mode',
+const lifecycleIconMap: Record<string, string> = {
+  annual: 'filter_1',
+  biennial: 'filter_2',
+  perennial: 'all_inclusive',
+};
+const lifecycleIcon = computed(() => lifecycleIconMap[plant.value?.lifecycle ?? ''] ?? 'filter_1');
+
+const bloomIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'nutrition',
+  vegetable: 'nutrition',
+};
+const bloomIcon = computed(() => bloomIconMap[plant.value?.type ?? ''] ?? 'local_florist');
+
+const POT_CONDITIONS = new Set(['pot', 'p9-pot', 'small-pot', 'big-pot']);
+
+function isPotCondition(cond: string): boolean {
+  return POT_CONDITIONS.has(cond);
+}
+
+function conditionIcon(cond: string): string {
+  const map: Record<string, string> = {
+    tray: 'grid_view',
+    'module-tray': 'grid_view',
+    outdoor: 'yard',
+    'outside-direct': 'park',
+    'sprout-tray': 'grass',
+  };
+  return map[cond] ?? 'eco';
+}
+
+// ── Calendar helpers ──
+const hasCalendarData = computed(() => {
+  if (!plant.value) return false;
+  const cal = plant.value.calendar;
+  return [cal.indoorSowing, cal.coldGreenhouse, cal.outdoor, cal.harvestPeriod]
+    .some(r => r && r.length > 0);
+});
+
+const hasHarvestPeriod = computed(() =>
+  plant.value?.calendar.harvestPeriod && plant.value.calendar.harvestPeriod.length > 0,
 );
 
+function inRange(month: number, range: number[] | null): boolean {
+  if (!range) return false;
+  return range.includes(month);
+}
+
+// ── Care steps ──
+const sortedCareSteps = computed(() =>
+  plant.value ? [...plant.value.careSteps].sort((a, b) => a.order - b.order) : [],
+);
+
+// ── Text fields ──
 const additionalNotes = computed(() =>
   plant.value ? localize(plant.value.maintenanceNotes) : '',
 );
@@ -365,13 +614,23 @@ const additionalNotes = computed(() =>
 const stemTipsText = computed(() =>
   plant.value?.stemTips ? localize(plant.value.stemTips) : '',
 );
+
+// ── Helpers ──
+function isLightColor(hex: string): boolean {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.85;
+}
 </script>
 
 <style scoped lang="scss">
 /* ── Page wrapper ── */
 .detail-page {
+  position: relative;
   min-height: 100vh;
-  background: var(--sand);
+  background: var(--warm-white);
   padding: 0 !important;
 }
 
@@ -382,10 +641,7 @@ const stemTipsText = computed(() =>
   justify-content: center;
   min-height: 100vh;
 
-  &__inner {
-    text-align: center;
-    padding: 24px;
-  }
+  &__inner { text-align: center; padding: 24px; }
 
   &__icon {
     font-size: 48px;
@@ -412,18 +668,61 @@ const stemTipsText = computed(() =>
 }
 
 /* ══════════════════════════════════════
+   0. STICKY NAV (JS-driven floating)
+   ══════════════════════════════════════ */
+.sticky-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4; /* below .sheet (z-index: 5) so buttons tuck behind it */
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.sticky-nav__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(254, 252, 247, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.15s ease, background 0.2s ease;
+  pointer-events: auto;
+
+  .material-icons-outlined {
+    font-size: 20px;
+    color: var(--deep-brown);
+  }
+
+  &:active { transform: scale(0.92); }
+
+  &--fav-active {
+    background: rgba(254, 252, 247, 0.8);
+
+    .material-icons-outlined {
+      color: var(--flower);
+    }
+  }
+}
+
+/* ══════════════════════════════════════
    1. HERO
    ══════════════════════════════════════ */
 .hero {
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 380px;
   overflow: hidden;
-}
-
-.hero__media {
-  width: 100%;
-  height: 100%;
 }
 
 .hero__img {
@@ -431,6 +730,8 @@ const stemTipsText = computed(() =>
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: contrast(1.06) saturate(1.08);
+  will-change: transform;
 }
 
 .hero__placeholder {
@@ -451,424 +752,640 @@ const stemTipsText = computed(() =>
   opacity: 0.18;
 }
 
-.hero__back {
+.hero__overlay {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--warm-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  box-shadow: var(--shadow-button);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  z-index: 10;
-
-  .material-icons-outlined {
-    font-size: 20px;
-    color: var(--deep-brown);
-  }
-
-  &:active {
-    transform: scale(0.92);
-    box-shadow: 0 1px 4px rgba(53, 43, 34, 0.08);
-  }
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(53, 43, 34, 0.08) 0%,
+    transparent 30%,
+    transparent 60%,
+    rgba(53, 43, 34, 0.35) 100%
+  );
+  pointer-events: none;
 }
 
 .hero__dots {
   position: absolute;
-  bottom: 16px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  align-items: center;
+  z-index: 10;
 }
 
 .hero__dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: rgba(53, 43, 34, 0.18);
+  background: rgba(254, 252, 247, 0.4);
   border: none;
   padding: 0;
   cursor: pointer;
   transition: all 0.3s ease;
 
   &--active {
+    background: rgba(254, 252, 247, 0.95);
     width: 20px;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--moss);
+    border-radius: 4px;
   }
 }
 
 /* ══════════════════════════════════════
-   2. CONTENT CARD
+   2. CONTENT SHEET
    ══════════════════════════════════════ */
-.content {
+.sheet {
   position: relative;
-  margin-top: -24px;
-  z-index: 2;
-}
-
-.content__card {
+  margin-top: -28px;
   background: var(--warm-white);
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
-  box-shadow: 0 -4px 24px rgba(53, 43, 34, 0.05);
-  padding-bottom: 100px;
+  border-radius: 24px 24px 0 0;
+  z-index: 5;
+  padding-bottom: 0;
+  min-height: 500px;
+  box-shadow: 0 -4px 20px rgba(53, 43, 34, 0.08);
 }
 
-/* ── Section ── */
-.section {
-  padding: 20px 24px;
+.sheet__handle {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
 
-  &--compact {
-    padding: 16px 24px;
+  &::after {
+    content: '';
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
   }
-}
-
-/* ── Gradient divider ── */
-.divider {
-  height: 1px;
-  margin: 0 24px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--border) 15%,
-    var(--border) 85%,
-    transparent 100%
-  );
-}
-
-/* ── Section title ── */
-.section__title {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--deep-brown);
-  margin-bottom: 14px;
-  letter-spacing: -0.01em;
 }
 
 /* ── 2a. Header ── */
-.header {
-  padding: 24px 24px 0;
+.plant-header {
+  padding: 6px 24px 0;
 }
 
-.header__top {
+.meta-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.header__name {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--deep-brown);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-
-.header__badge {
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.header__latin {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--muted);
-  font-style: italic;
-  font-weight: 400;
   margin-bottom: 10px;
 }
 
-.header__verification {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--clay);
-  background: var(--clay-pale);
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-
-  .material-icons-outlined {
-    font-size: 14px;
-  }
-}
-
-/* ── 2b. Actions ── */
-.actions {
+.meta-left {
   display: flex;
-  gap: 10px;
-  padding: 16px 24px 20px;
+  align-items: center;
+  gap: 6px;
 }
 
-.btn {
+.verified-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
-  letter-spacing: 0.01em;
-
-  .material-icons-outlined {
-    font-size: 17px;
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
-}
-
-.btn--stock {
-  background: var(--moss-ghost);
-  border: 1.5px solid var(--moss-pale);
+  gap: 3px;
+  padding: 3px 8px;
+  background: var(--moss-pale);
   color: var(--moss);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 
-  &:hover {
-    background: var(--moss-pale);
-  }
-
-  &-active {
-    background: var(--moss-pale);
-    border-color: var(--moss);
-  }
+  .material-icons-outlined { font-size: 11px; }
 }
 
-.btn--plant {
-  background: var(--moss);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(92, 107, 78, 0.25);
-
-  &:hover {
-    background: #50603F;
-  }
-
-  &:active {
-    box-shadow: 0 1px 6px rgba(92, 107, 78, 0.20);
-  }
-}
-
-/* ── 2c. Calendar ── */
-.cal-months {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  margin-left: 96px;
-  margin-bottom: 8px;
-}
-
-.cal-months__label {
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--muted-light);
-  text-align: center;
-  line-height: 1;
-
-  &--current {
-    color: var(--moss);
-    font-weight: 700;
-  }
-}
-
-.cal-row {
-  display: flex;
+.status-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+
+  .material-icons-outlined { font-size: 11px; }
+
+  &--pending {
+    background: var(--clay-pale);
+    color: var(--clay);
+  }
+
+  &--unverified {
+    background: rgba(125, 161, 184, 0.12);
+    color: var(--cal-indoor);
+  }
 }
 
-.cal-row__label {
-  width: 88px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--muted);
-  text-align: right;
-  flex-shrink: 0;
-  line-height: 1.1;
-}
-
-/* MonthRangeBar is rendered as the flex: 1 grid component */
-:deep(.month-grid) {
-  flex: 1;
-}
-
-.cal-legend {
-  display: flex;
-  gap: 14px;
-  margin-top: 10px;
-  margin-left: 96px;
-}
-
-.legend-item {
-  display: flex;
+.stock-indicator {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10.5px;
+  gap: 3px;
+  padding: 3px 7px;
+  font-size: 10px;
   font-weight: 500;
-  color: var(--muted);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: background 0.2s ease;
+
+  &:hover { background: var(--sand); }
+
+  &--in { color: var(--moss); }
+  &--out { color: var(--muted-light); }
 }
 
-.legend-item__bar {
+.stock-leaf {
   width: 12px;
-  height: 4px;
-  border-radius: 2px;
+  height: 7px;
+  border-radius: 0 7px 0 7px;
+  flex-shrink: 0;
 
-  &--indoor {
-    background: var(--cal-indoor);
-  }
-
-  &--cold {
-    background: var(--cal-cold);
-  }
-
-  &--outdoor {
-    background: var(--cal-outdoor);
-  }
+  .stock-indicator--in & { background: var(--moss); }
+  .stock-indicator--out & { background: #D4CEC5; }
 }
 
-/* ── 2d. Quick facts ── */
-.facts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.fact {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  background: var(--sand);
-  border-radius: var(--radius-md);
-}
-
-.fact__icon {
-  width: 34px;
-  height: 34px;
+.type-icon {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--moss-pale);
+
+  .material-icons-outlined { font-size: 17px; }
+
+  &.flower { background: var(--flower-bg); color: var(--flower); }
+  &.herb { background: var(--herb-bg); color: var(--herb); }
+  &.vegetable { background: var(--veg-bg); color: var(--veg); }
+}
+
+.plant-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--deep-brown);
+  line-height: 1.15;
+  margin-bottom: 2px;
+  letter-spacing: -0.02em;
+}
+
+.plant-variety {
+  font-weight: 400;
+  color: var(--muted-light);
+  font-style: italic;
+  font-size: 22px;
+}
+
+.plant-latin {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--warm-white);
+  box-shadow: 0 0 0 1px var(--border);
+  flex-shrink: 0;
+
+  &--light { box-shadow: 0 0 0 1px #D4D0C8; }
+}
+
+/* ── 2b. Quick facts grid ── */
+.facts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin: 0 24px 20px;
+}
+
+.fact-cell {
+  background: var(--warm-white);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
 
   .material-icons-outlined {
-    font-size: 16px;
+    font-size: 19px;
+    color: var(--clay);
+  }
+}
+
+.fact-label {
+  font-size: 9.5px;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.fact-value {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--deep-brown);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ── 2c. Tabs ── */
+.tabs-wrap {
+  padding: 0 24px;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  background: var(--sand);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border-light);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 4px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+
+  &:hover:not(.tab--active) {
+    color: var(--deep-brown);
+    background: rgba(254, 252, 247, 0.5);
+  }
+
+  &:active:not(.tab--active) {
+    transform: scale(0.96);
+  }
+
+  &--active {
+    background: var(--warm-white);
+    color: var(--deep-brown);
+    font-weight: 700;
+    box-shadow: 0 1px 6px rgba(53, 43, 34, 0.1), 0 0 0 0.5px rgba(53, 43, 34, 0.04);
+  }
+}
+
+/* ── Tab panels ── */
+.tab-panel {
+  padding: 0 24px;
+}
+
+/* ── Section cards ── */
+.section-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+/* ══════════════════════════════════════
+   CALENDAR — FLAT BARS
+   ══════════════════════════════════════ */
+.cal-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 6px;
+
+  &:last-of-type { margin-bottom: 0; }
+}
+
+.cal-icon {
+  width: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-icons-outlined { font-size: 14px; }
+}
+
+.cal-bars {
+  flex: 1;
+  display: flex;
+  gap: 2.5px;
+}
+
+.cal-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--cal-empty, #EDEAE4);
+  transition: background 0.2s ease;
+
+  &--indoor { background: var(--cal-indoor); }
+  &--cold { background: var(--cal-cold); }
+  &--outdoor { background: var(--cal-outdoor); }
+  &--bloom { background: var(--cal-bloom); }
+}
+
+.cal-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.cal-legend-dot {
+  width: 8px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ── Planting conditions ── */
+.conditions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.condition-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: var(--sand);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--deep-brown);
+
+  .material-icons-outlined {
+    font-size: 14px;
+    color: var(--moss);
+  }
+
+  .condition-svg {
+    width: 14px;
+    height: 14px;
     color: var(--moss);
   }
 }
 
-.fact__label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.fact__value {
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--deep-brown);
-  line-height: 1.2;
-}
-
-/* ── 2e. Colors ── */
-.colors {
+/* ══════════════════════════════════════
+   GROWING TAB — DETAIL LIST
+   ══════════════════════════════════════ */
+.detail-list {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-/* ── 2g. Planting conditions ── */
-.chips {
+.detail-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+  &:first-child { padding-top: 0; }
 }
 
-.chip {
-  font-size: 12.5px;
+.detail-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 12px;
+
+  .material-icons-outlined {
+    font-size: 16px;
+    color: var(--clay);
+  }
+
+  &--tuber {
+    background: var(--tuber-bg, #F0E0D4);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      color: var(--tuber, #B07D62);
+    }
+  }
+}
+
+.detail-text { flex: 1; }
+
+.detail-text__label {
+  font-size: 10.5px;
+  color: var(--muted-light);
   font-weight: 500;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  background: var(--sand);
-  color: var(--ink-soft);
-  border: 1px solid var(--border-light);
+  margin-bottom: 1px;
 }
 
-/* ── 2h/2i. Note boxes ── */
-.note-box {
-  background: var(--sand);
-  border-radius: var(--radius-md);
-  padding: 16px 18px;
+.detail-text__value {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  color: var(--deep-brown);
+  font-weight: 600;
+}
+
+/* ── Pinching highlight ── */
+.highlight-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--moss-pale), rgba(230, 235, 226, 0.5));
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+}
+
+.highlight-icon {
+  width: 30px;
+  height: 30px;
+  background: var(--moss);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: 16px;
+    color: white;
+  }
+}
+
+.highlight-text {
+  font-size: 12px;
+  color: var(--deep-brown);
+  font-weight: 500;
+  line-height: 1.45;
+
+  strong { font-weight: 700; }
+}
+
+/* ══════════════════════════════════════
+   CARE TAB
+   ══════════════════════════════════════ */
+.care-steps { position: relative; }
+
+.care-step {
+  display: flex;
+  gap: 12px;
   position: relative;
-  overflow: hidden;
+  padding-bottom: 18px;
+
+  &:last-child { padding-bottom: 0; }
 
   &::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 14px;
+    top: 30px;
     bottom: 0;
-    width: 3px;
+    width: 1.5px;
+    background: var(--border);
   }
 
-  &--moss::before {
-    background: var(--moss);
-  }
-
-  &--clay::before {
-    background: var(--clay);
-  }
+  &:last-child::before { display: none; }
 }
 
-.note-box__label {
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--clay-pale);
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10.5px;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 8px;
-
-  .material-icons-outlined {
-    font-size: 14px;
-  }
-
-  &--clay {
-    color: var(--clay);
-  }
-
-  &--moss {
-    color: var(--moss);
-  }
+  color: var(--clay);
+  z-index: 1;
 }
 
-.note-box__text {
+.step-content {
+  flex: 1;
+  padding-top: 3px;
+}
+
+.step-title {
+  font-family: var(--font-display);
   font-size: 13.5px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--ink-soft);
+  font-weight: 700;
+  color: var(--deep-brown);
+  margin-bottom: 2px;
+}
+
+.step-when {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* ── Notes ── */
+.note-block { margin-bottom: 14px; }
+.note-block:last-child { margin-bottom: 0; }
+
+.note-block__title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--clay);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .material-icons-outlined { font-size: 14px; }
+
+  &--clay { color: var(--clay); }
+}
+
+.note-block__text {
+  font-size: 13px;
+  color: var(--deep-brown);
+  line-height: 1.65;
+}
+
+.note-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 14px 0;
+}
+
+/* ── Action button ── */
+.action-row {
+  padding: 0 24px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--moss);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  .material-icons-outlined { font-size: 19px; }
+
+  &:hover { box-shadow: 0 4px 16px rgba(92, 107, 78, 0.3); }
+  &:active { transform: scale(0.97); }
 }
 </style>

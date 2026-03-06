@@ -15,21 +15,22 @@ export function buildPlantingTimeline(
   const seedDate = new Date(planting.dateSeeded);
   const now = new Date();
 
-  // 1. Seeded event (always completed)
+  const isTuber = plant.propagation === 'tuber';
+
+  // 1. Seeded/Planted event (always completed)
   events.push({
     id: `${planting.id}-seeded`,
-    action: { nl: 'Gezaaid', en: 'Seeded' },
+    action: isTuber ? { nl: 'Geplant', en: 'Planted' } : { nl: 'Gezaaid', en: 'Seeded' },
     expectedDate: seedDate,
-    condition: {
-      nl: `${planting.amount} zaden - ${planting.location}`,
-      en: `${planting.amount} seeds - ${planting.location}`,
-    },
+    condition: isTuber
+      ? { nl: `${planting.amount} knollen - ${planting.location}`, en: `${planting.amount} tubers - ${planting.location}` }
+      : { nl: `${planting.amount} zaden - ${planting.location}`, en: `${planting.amount} seeds - ${planting.location}` },
     dateCalculable: true,
     completed: true,
   });
 
-  // 2. Germination event
-  if (plant.germinationDays) {
+  // 2. Germination event (skip for tubers)
+  if (plant.germinationDays && !isTuber) {
     const avgDays = Math.round((plant.germinationDays.min + plant.germinationDays.max) / 2);
     const germDate = addDays(seedDate, avgDays);
     events.push({
@@ -51,8 +52,8 @@ export function buildPlantingTimeline(
 
     if (step.condition.type === 'days') {
       const days = typeof step.condition.value === 'number' ? step.condition.value : 0;
-      // Calculate from germination if available, otherwise from seed date
-      const baseDate = plant.germinationDays
+      // Calculate from germination if available (and not tuber), otherwise from seed date
+      const baseDate = plant.germinationDays && !isTuber
         ? addDays(seedDate, Math.round((plant.germinationDays.min + plant.germinationDays.max) / 2))
         : seedDate;
       const expectedDate = addDays(baseDate, days);

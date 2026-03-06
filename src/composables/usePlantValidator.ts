@@ -1,4 +1,5 @@
-import type { Plant, PlantType, GerminationType, SunRequirement } from 'src/types/plant';
+import type { Plant, PlantType, PlantLifecycle, GerminationType, SunRequirement, PropagationType } from 'src/types/plant';
+import { normalizeMonthRange } from 'src/types/plant';
 
 export interface ValidationResult {
   valid: boolean;
@@ -15,8 +16,10 @@ export interface ValidationResult {
 }
 
 const VALID_TYPES: PlantType[] = ['flower', 'vegetable', 'herb'];
+const VALID_LIFECYCLES: PlantLifecycle[] = ['annual', 'biennial', 'perennial'];
 const VALID_GERMINATION: GerminationType[] = ['light', 'dark'];
 const VALID_SUN: SunRequirement[] = ['full-sun', 'partial-shade', 'shade'];
+const VALID_PROPAGATION: PropagationType[] = ['seed', 'tuber'];
 
 function validateBilingualText(obj: unknown, fieldName: string): string[] {
   const errors: string[] = [];
@@ -45,8 +48,24 @@ export function usePlantValidator() {
       errors.push(`type: must be one of ${VALID_TYPES.join(', ')}`);
     }
 
-    // Germination
-    if (!VALID_GERMINATION.includes(data.germination as GerminationType)) {
+    // Lifecycle (optional — default to 'annual' if missing)
+    if (data.lifecycle && !VALID_LIFECYCLES.includes(data.lifecycle as PlantLifecycle)) {
+      warnings.push(`lifecycle: must be one of ${VALID_LIFECYCLES.join(', ')}`);
+    }
+    if (!data.lifecycle) {
+      data.lifecycle = 'annual';
+    }
+
+    // Propagation (optional — default to 'seed' if missing)
+    if (data.propagation && !VALID_PROPAGATION.includes(data.propagation as PropagationType)) {
+      warnings.push(`propagation: must be one of ${VALID_PROPAGATION.join(', ')}`);
+    }
+    if (!data.propagation) {
+      data.propagation = 'seed';
+    }
+
+    // Germination (not required for tubers)
+    if (data.propagation !== 'tuber' && !VALID_GERMINATION.includes(data.germination as GerminationType)) {
       errors.push(`germination: must be one of ${VALID_GERMINATION.join(', ')}`);
     }
 
@@ -59,13 +78,17 @@ export function usePlantValidator() {
     errors.push(...validateBilingualText(data.name, 'name'));
     errors.push(...validateBilingualText(data.maintenanceNotes, 'maintenanceNotes'));
 
-    // Calendar
+    // Calendar — backward compat: rename bloomPeriod → harvestPeriod
     if (data.calendar && typeof data.calendar === 'object') {
       const cal = data.calendar as Record<string, unknown>;
-      for (const key of ['indoorSowing', 'greenhouse', 'coldGreenhouse', 'outdoor']) {
+      if (cal.bloomPeriod !== undefined && cal.harvestPeriod === undefined) {
+        cal.harvestPeriod = cal.bloomPeriod;
+        delete cal.bloomPeriod;
+      }
+      for (const key of ['indoorSowing', 'coldGreenhouse', 'outdoor', 'harvestPeriod']) {
         const val = cal[key];
-        if (val !== null && (!Array.isArray(val) || val.length !== 2)) {
-          warnings.push(`calendar.${key}: should be [start, end] or null`);
+        if (val !== null && !Array.isArray(val)) {
+          warnings.push(`calendar.${key}: should be an array of months or null`);
         }
       }
     } else {
@@ -74,7 +97,14 @@ export function usePlantValidator() {
 
     // Arrays
     if (!Array.isArray(data.colors)) warnings.push('colors: should be an array');
-    if (!Array.isArray(data.images)) warnings.push('images: should be an array');
+    if (!Array.isArray(data.images)) {
+      warnings.push('images: should be an array');
+    } else {
+      // Normalize string URLs to PlantImage objects
+      data.images = (data.images as (string | Record<string, unknown>)[]).map((img) =>
+        typeof img === 'string' ? { url: img } : img,
+      );
+    }
     if (!Array.isArray(data.careSteps)) warnings.push('careSteps: should be an array');
     if (!Array.isArray(data.plantingConditions)) warnings.push('plantingConditions: should be an array');
 
@@ -84,6 +114,16 @@ export function usePlantValidator() {
 
     // Force status to unverified
     data.status = 'unverified';
+
+    // Normalize legacy [start, end] calendar ranges to month arrays
+    if (data.calendar && typeof data.calendar === 'object') {
+      const cal = data.calendar as Record<string, unknown>;
+      for (const key of ['indoorSowing', 'coldGreenhouse', 'outdoor', 'harvestPeriod']) {
+        if (Array.isArray(cal[key])) {
+          cal[key] = normalizeMonthRange(cal[key] as number[]);
+        }
+      }
+    }
 
     return {
       valid: errors.length === 0,

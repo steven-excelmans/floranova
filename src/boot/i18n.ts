@@ -24,12 +24,17 @@ function getSavedLocale(): MessageLanguages {
 }
 
 export default defineBoot(({ app }) => {
+  const savedLocale = getSavedLocale();
+
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: getSavedLocale(),
+    locale: savedLocale,
     fallbackLocale: 'nl',
     legacy: false,
     messages,
   });
+
+  // Sync <html lang> so native date pickers use the correct locale
+  document.documentElement.lang = savedLocale === 'nl' ? 'nl' : 'en';
 
   app.use(i18n);
 });

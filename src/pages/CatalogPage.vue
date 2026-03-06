@@ -15,20 +15,13 @@
         </div>
 
         <div class="info-right">
-          <div class="info-legend">
-            <div class="legend-dot-group">
-              <span class="legend-dot" style="background: var(--cal-indoor);" />
-              <span class="legend-label">{{ t('catalog.calIndoor') }}</span>
-            </div>
-            <div class="legend-dot-group">
-              <span class="legend-dot" style="background: var(--cal-cold);" />
-              <span class="legend-label">{{ t('catalog.calColdFrame') }}</span>
-            </div>
-            <div class="legend-dot-group">
-              <span class="legend-dot" style="background: var(--cal-outdoor);" />
-              <span class="legend-label">{{ t('catalog.calOutdoor') }}</span>
-            </div>
-          </div>
+          <button
+            class="fav-toggle"
+            :class="{ 'fav-toggle--active': favoritesOnly }"
+            @click="favoritesOnly = !favoritesOnly"
+          >
+            <span class="material-icons-outlined">{{ favoritesOnly ? 'favorite' : 'favorite_border' }}</span>
+          </button>
 
           <button
             class="filter-toggle"
@@ -48,10 +41,12 @@
             :search="plantStore.search"
             :type-filter="plantStore.typeFilter"
             :sun-filter="plantStore.sunFilter"
+            :propagation-filter="plantStore.propagationFilter"
             :stock-only="plantStore.stockOnly"
             @update:search="plantStore.search = $event"
             @update:type-filter="plantStore.typeFilter = $event"
             @update:sun-filter="plantStore.sunFilter = $event"
+            @update:propagation-filter="plantStore.propagationFilter = $event"
             @update:stock-only="plantStore.stockOnly = $event"
           />
         </div>
@@ -59,8 +54,8 @@
 
       <!-- Empty state -->
       <div v-if="visibleGroups.size === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">search_off</span>
-        <div class="empty-text">{{ t('catalog.noResults') }}</div>
+        <span class="material-icons-outlined empty-icon">{{ favoritesOnly ? 'favorite_border' : 'search_off' }}</span>
+        <div class="empty-text">{{ favoritesOnly ? t('catalog.noFavorites') : t('catalog.noResults') }}</div>
       </div>
 
       <!-- Species groups -->
@@ -82,6 +77,7 @@
           :key="plant.id"
           :plant="plant"
           :in-stock="stockStore.isInStock(plant.id)"
+          :is-favorite="favoritesStore.isFavorite(plant.id)"
           @select="router.push(`/plant/${$event}`)"
           @toggle-stock="stockStore.toggleStock($event)"
         />
@@ -96,6 +92,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { useStockStore } from 'src/stores/stock-store';
+import { useFavoritesStore } from 'src/stores/favorites-store';
 import PlantCard from 'src/components/catalog/PlantCard.vue';
 import PlantFilters from 'src/components/catalog/PlantFilters.vue';
 
@@ -103,25 +100,31 @@ const { t } = useI18n();
 const router = useRouter();
 const plantStore = usePlantStore();
 const stockStore = useStockStore();
+const favoritesStore = useFavoritesStore();
 
 const filterOpen = ref(false);
+const favoritesOnly = ref(false);
 
 const visibleGroups = computed(() => {
-  if (!plantStore.stockOnly) return plantStore.groupedBySpecies;
+  const source = plantStore.groupedBySpecies;
+  const result = new Map<string, typeof plantStore.filteredPlants>();
 
-  const filtered = new Map<string, typeof plantStore.filteredPlants>();
-  for (const [species, plants] of plantStore.groupedBySpecies) {
-    const inStockPlants = plants.filter((p) => stockStore.isInStock(p.id));
-    if (inStockPlants.length > 0) filtered.set(species, inStockPlants);
+  for (const [species, plants] of source) {
+    let filtered = plantStore.stockOnly
+      ? plants.filter((p) => stockStore.isInStock(p.id))
+      : plants;
+    if (favoritesOnly.value) {
+      filtered = filtered.filter((p) => favoritesStore.isFavorite(p.id));
+    }
+    if (filtered.length === 0) continue;
+    result.set(species, filtered);
   }
-  return filtered;
+  return result;
 });
 
 const totalPlants = computed(() => {
   let count = 0;
-  for (const plants of visibleGroups.value.values()) {
-    count += plants.length;
-  }
+  for (const plants of visibleGroups.value.values()) count += plants.length;
   return count;
 });
 </script>
@@ -190,30 +193,46 @@ const totalPlants = computed(() => {
   gap: 10px;
 }
 
-.info-legend {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend-dot-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
+// ── Favorites toggle button ──
+.fav-toggle {
+  position: relative;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.legend-label {
-  font-size: 10.5px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
-  font-weight: 500;
-  line-height: 1;
+  transition: all 0.25s ease;
+  padding: 0;
+  flex-shrink: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  .material-icons-outlined {
+    font-size: 15px;
+    color: inherit;
+  }
+
+  &:hover {
+    border-color: var(--flower);
+    color: var(--flower);
+  }
+
+  &--active {
+    background: var(--flower);
+    border-color: var(--flower);
+    color: var(--warm-white);
+
+    &:hover {
+      background: var(--flower);
+      border-color: var(--flower);
+      color: var(--warm-white);
+    }
+  }
 }
 
 // ── Filter toggle button ──
@@ -345,4 +364,5 @@ const totalPlants = computed(() => {
   font-weight: 400;
   color: var(--muted);
 }
+
 </style>

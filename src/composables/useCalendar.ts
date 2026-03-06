@@ -1,13 +1,10 @@
 import type { MonthRange, Plant } from 'src/types/plant';
 
-export type CalendarAction = 'indoorSowing' | 'greenhouse' | 'coldGreenhouse' | 'outdoor';
+export type CalendarAction = 'indoorSowing' | 'coldGreenhouse' | 'outdoor';
 
 export function isMonthInRange(month: number, range: MonthRange): boolean {
   if (!range) return false;
-  const [start, end] = range;
-  return start <= end
-    ? month >= start && month <= end
-    : month >= start || month <= end;
+  return range.includes(month);
 }
 
 export function getPlantsForMonth(

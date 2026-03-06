@@ -58,33 +58,82 @@
       </div>
     </div>
 
-    <!-- Sun filter + stock toggle -->
-    <div class="filter-secondary">
-      <div class="sun-filter">
-        <button
-          class="sun-btn"
-          :class="{ active: sunFilter === 'full-sun' }"
-          :title="t('catalog.fullSun')"
-          @click="onSunToggle('full-sun')"
-        >
-          <span class="material-icons-outlined">light_mode</span>
-        </button>
-        <button
-          class="sun-btn"
-          :class="{ active: sunFilter === 'partial-shade' }"
-          :title="t('catalog.partialShade')"
-          @click="onSunToggle('partial-shade')"
-        >
-          <span class="material-icons-outlined">contrast</span>
-        </button>
+    <!-- Expand trigger -->
+    <button class="expand-trigger" @click="expanded = !expanded">
+      <span class="trigger-content">
+        {{ t('catalog.moreFilters') }}
+        <span v-if="activeSecondaryCount > 0" class="active-badge">{{ activeSecondaryCount }}</span>
+        <span class="material-icons-outlined" :class="{ rotated: expanded }">expand_more</span>
+      </span>
+    </button>
+
+    <!-- Expandable tray -->
+    <div class="tray" :class="expanded ? 'expanded' : 'collapsed'">
+      <div class="tray-inner">
+        <!-- Sunlight + Propagation (same row) -->
+        <div class="filter-row-split">
+          <div class="filter-group">
+            <span class="filter-group__title">{{ t('plant.exposure') }}</span>
+            <div class="filter-group__row">
+              <button
+                class="sun-btn"
+                :class="{ active: sunFilter === 'full-sun' }"
+                :title="t('catalog.fullSun')"
+                @click="onSunToggle('full-sun')"
+              >
+                <span class="material-icons-outlined">light_mode</span>
+              </button>
+              <button
+                class="sun-btn"
+                :class="{ active: sunFilter === 'partial-shade' }"
+                :title="t('catalog.partialShade')"
+                @click="onSunToggle('partial-shade')"
+              >
+                <span class="material-icons-outlined">contrast</span>
+              </button>
+              <button
+                class="sun-btn"
+                :class="{ active: sunFilter === 'shade' }"
+                :title="t('catalog.shade')"
+                @click="onSunToggle('shade')"
+              >
+                <span class="material-icons-outlined">wb_cloudy</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-group filter-group--right">
+            <span class="filter-group__title">{{ t('plant.propagation') }}</span>
+            <div class="filter-group__row">
+              <button
+                class="prop-icon-btn"
+                :class="{ active: propagationFilter === 'seed' }"
+                :title="t('catalog.seed')"
+                @click="onPropagationToggle('seed')"
+              >
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1C8 1 5 5 5 9c0 1.66 1.34 3 3 3s3-1.34 3-3C11 5 8 1 8 1z"/><path d="M8 5.5v4" stroke="white" stroke-width="0.8" fill="none" opacity="0.4"/></svg>
+              </button>
+              <button
+                class="prop-icon-btn"
+                :class="{ active: propagationFilter === 'tuber' }"
+                :title="t('catalog.tuber')"
+                @click="onPropagationToggle('tuber')"
+              >
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C6.5 3.5 4 6 4 9c0 2.2 1.8 3.5 4 3.5s4-1.3 4-3.5c0-3-2.5-5.5-4-5.5z"/><path d="M8 5.5c-.8 1.2-1.2 2.5-1.2 3.8" fill="none" stroke="white" stroke-width="0.5" opacity="0.3"/><path d="M7.2 3.8C7 2.8 7.3 1.5 8 1c.7.5 1 1.8.8 2.8" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 12.5c.2.5.2 1 .1 1.3M8 12.5v1.3M9.5 12.5c-.2.5-.2 1-.1 1.3" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock -->
+        <div class="filter-group">
+          <span class="filter-group__title">{{ t('catalog.availability') }}</span>
+          <StockToggle
+            :in-stock="stockOnly"
+            @toggle="onStockUpdate"
+          />
+        </div>
       </div>
-
-      <div class="filter-divider" />
-
-      <StockToggle
-        :in-stock="stockOnly"
-        @toggle="onStockUpdate"
-      />
     </div>
 
     <!-- Bottom divider -->
@@ -93,14 +142,16 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { PlantType, SunRequirement } from 'src/types/plant';
+import type { PlantType, SunRequirement, PropagationType } from 'src/types/plant';
 import StockToggle from './StockToggle.vue';
 
 const props = defineProps<{
   search: string;
   typeFilter: PlantType | null;
   sunFilter: SunRequirement | null;
+  propagationFilter: PropagationType | null;
   stockOnly: boolean;
 }>();
 
@@ -108,10 +159,20 @@ const emit = defineEmits<{
   'update:search': [value: string];
   'update:typeFilter': [value: PlantType | null];
   'update:sunFilter': [value: SunRequirement | null];
+  'update:propagationFilter': [value: PropagationType | null];
   'update:stockOnly': [value: boolean];
 }>();
 
 const { t } = useI18n();
+const expanded = ref(false);
+
+const activeSecondaryCount = computed(() => {
+  let count = 0;
+  if (props.sunFilter) count++;
+  if (props.propagationFilter) count++;
+  if (props.stockOnly) count++;
+  return count;
+});
 
 function onSearchInput(event: Event) {
   emit('update:search', (event.target as HTMLInputElement).value);
@@ -122,8 +183,11 @@ function onTypeUpdate(val: PlantType | null) {
 }
 
 function onSunToggle(val: SunRequirement) {
-  // Toggle: clicking the active one deactivates it
   emit('update:sunFilter', props.sunFilter === val ? null : val);
+}
+
+function onPropagationToggle(val: PropagationType) {
+  emit('update:propagationFilter', props.propagationFilter === val ? null : val);
 }
 
 function onStockUpdate() {
@@ -220,7 +284,7 @@ function onStockUpdate() {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-bottom: 14px;
+  padding-bottom: 12px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -272,23 +336,127 @@ function onStockUpdate() {
   flex-shrink: 0;
 }
 
-// ── Sun filter + stock toggle ──
-.filter-secondary {
+// ── Expand trigger ──
+.expand-trigger {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 20px 12px;
+  width: 100%;
+  gap: 8px;
+  padding: 8px 20px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.25s ease;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  &:hover {
+    color: var(--deep-brown);
+  }
 }
 
-.sun-filter {
+.trigger-content {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  padding: 0 8px;
+  flex-shrink: 0;
 }
 
+.trigger-content .material-icons-outlined {
+  font-size: 15px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  padding: 0 4px;
+  background: var(--clay);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+// ── Expandable tray ──
+.tray {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.tray.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.tray.expanded {
+  max-height: 300px;
+  opacity: 1;
+}
+
+.tray-inner {
+  padding: 6px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Split row (sunlight left, propagation right) ──
+.filter-row-split {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+// ── Filter group with title ──
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group--right {
+  align-items: flex-end;
+}
+
+.filter-group__title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted-light);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.filter-group__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// ── Sun buttons ──
 .sun-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: transparent;
@@ -315,11 +483,35 @@ function onStockUpdate() {
   }
 }
 
-.filter-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--border);
-  flex-shrink: 0;
+// ── Propagation icon buttons ──
+.prop-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  color: var(--muted);
+
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  &:hover {
+    border-color: var(--clay-light);
+    color: var(--deep-brown);
+  }
+
+  &.active {
+    background: var(--deep-brown);
+    border-color: var(--deep-brown);
+    color: var(--warm-white);
+  }
 }
 
 // ── Bottom header divider ──

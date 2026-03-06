@@ -67,7 +67,6 @@
           <h2 class="form-section__title">{{ t('admin.calendar') }}</h2>
           <div class="form-stack">
             <MonthRangePicker v-model="form.calendar.indoorSowing" :label="t('admin.indoorSowing')" />
-            <MonthRangePicker v-model="form.calendar.greenhouse" :label="t('admin.greenhouse')" />
             <MonthRangePicker v-model="form.calendar.coldGreenhouse" :label="t('admin.coldGreenhouse')" />
             <MonthRangePicker v-model="form.calendar.outdoor" :label="t('admin.outdoor')" />
           </div>
@@ -129,7 +128,7 @@
           <div class="form-field" style="margin-top: 14px">
             <label class="form-field__label">{{ t('admin.images') }}</label>
             <textarea
-              :value="form.images.join('\n')"
+              :value="form.images.map(img => typeof img === 'string' ? img : img.url).join('\n')"
               class="form-field__input form-field__input--textarea"
               rows="3"
               placeholder="https://example.com/image.jpg"
@@ -210,7 +209,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { savePlant, createPlant } from 'src/services/plant-service';
-import type { Plant, PlantType, GerminationType, SunRequirement, PlantingCondition, PlantStatus, BilingualText } from 'src/types/plant';
+import type { Plant, PlantType, PlantLifecycle, GerminationType, SunRequirement, PlantingCondition, PlantStatus, BilingualText } from 'src/types/plant';
 import StatusBadge from 'src/components/admin/StatusBadge.vue';
 import BilingualInput from 'src/components/admin/BilingualInput.vue';
 import MonthRangePicker from 'src/components/admin/MonthRangePicker.vue';
@@ -228,7 +227,7 @@ const plant = computed(() =>
   isNew.value ? null : plantStore.getPlantById(route.params.id as string),
 );
 
-const allConditions: PlantingCondition[] = ['tray', 'outside-direct', 'p9-pot', 'small-pot', 'big-pot', 'module-tray'];
+const allConditions: PlantingCondition[] = ['tray', 'pot', 'outdoor', 'sprout-tray'];
 
 function emptyPlant(): Plant {
   return {
@@ -238,7 +237,8 @@ function emptyPlant(): Plant {
     latinName: '',
     name: { nl: '', en: '' },
     type: 'flower' as PlantType,
-    calendar: { indoorSowing: null, greenhouse: null, coldGreenhouse: null, outdoor: null },
+    lifecycle: 'annual' as PlantLifecycle,
+    calendar: { indoorSowing: null, coldGreenhouse: null, outdoor: null, harvestPeriod: null },
     germination: 'light' as GerminationType,
     colors: [],
     images: [],
@@ -254,6 +254,7 @@ function emptyPlant(): Plant {
     minDistanceCm: 20,
     stemTips: null,
     sun: 'full-sun' as SunRequirement,
+    propagation: 'seed',
     status: 'pending' as PlantStatus,
   };
 }

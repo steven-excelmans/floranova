@@ -1,14 +1,30 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
-import type { Plant, PlantType, SunRequirement } from 'src/types/plant';
+import type { Plant, PlantType, SunRequirement, PropagationType } from 'src/types/plant';
+import { normalizeMonthRange } from 'src/types/plant';
 import { subscribePlants } from 'src/services/plant-service';
 import plantsData from 'src/data/plants';
 
+function normalizePlant(plant: Plant): Plant {
+  const cal = plant.calendar;
+  return {
+    ...plant,
+    propagation: plant.propagation ?? 'seed',
+    calendar: {
+      indoorSowing: normalizeMonthRange(cal.indoorSowing),
+      coldGreenhouse: normalizeMonthRange(cal.coldGreenhouse),
+      outdoor: normalizeMonthRange(cal.outdoor),
+      harvestPeriod: normalizeMonthRange(cal.harvestPeriod ?? (cal as Record<string, unknown>).bloomPeriod as number[] | null),
+    },
+  };
+}
+
 export const usePlantStore = defineStore('plants', () => {
-  const plants = ref<Plant[]>(plantsData);
+  const plants = ref<Plant[]>(plantsData.map(normalizePlant));
   const search = ref('');
   const typeFilter = ref<PlantType | null>(null);
   const sunFilter = ref<SunRequirement | null>(null);
+  const propagationFilter = ref<PropagationType | null>(null);
   const stockOnly = ref(false);
   const firestoreLoaded = ref(false);
 
@@ -36,7 +52,7 @@ export const usePlantStore = defineStore('plants', () => {
           if (!staticIds.has(fp.id)) merged.push(fp);
         }
 
-        plants.value = merged;
+        plants.value = merged.map(normalizePlant);
         firestoreLoaded.value = true;
       });
     } catch {
@@ -58,6 +74,7 @@ export const usePlantStore = defineStore('plants', () => {
       if (plant.status === 'pending') return false;
       if (typeFilter.value && plant.type !== typeFilter.value) return false;
       if (sunFilter.value && plant.sun !== sunFilter.value) return false;
+      if (propagationFilter.value && plant.propagation !== propagationFilter.value) return false;
 
       if (search.value) {
         const q = search.value.toLowerCase();
@@ -82,7 +99,15 @@ export const usePlantStore = defineStore('plants', () => {
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(plant);
     }
-    return groups;
+    // Sort species alphabetically, and varieties within each species
+    const sorted = new Map<string, Plant[]>();
+    const sortedKeys = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+    for (const key of sortedKeys) {
+      const plants = groups.get(key)!;
+      plants.sort((a, b) => (a.variety ?? '').localeCompare(b.variety ?? ''));
+      sorted.set(key, plants);
+    }
+    return sorted;
   });
 
   const hasActiveFilter = computed(
@@ -90,6 +115,7 @@ export const usePlantStore = defineStore('plants', () => {
       search.value !== '' ||
       typeFilter.value !== null ||
       sunFilter.value !== null ||
+      propagationFilter.value !== null ||
       stockOnly.value,
   );
 
@@ -101,6 +127,7 @@ export const usePlantStore = defineStore('plants', () => {
     search.value = '';
     typeFilter.value = null;
     sunFilter.value = null;
+    propagationFilter.value = null;
     stockOnly.value = false;
   }
 
@@ -109,6 +136,7 @@ export const usePlantStore = defineStore('plants', () => {
     search,
     typeFilter,
     sunFilter,
+    propagationFilter,
     stockOnly,
     firestoreLoaded,
     filteredPlants,

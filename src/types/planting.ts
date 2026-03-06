@@ -1,6 +1,6 @@
 import type { BilingualText } from './plant';
 
-export type PlantingLocation = 'indoor' | 'greenhouse' | 'cold-greenhouse' | 'outdoor';
+export type PlantingLocation = 'indoor' | 'cold-greenhouse' | 'outdoor';
 
 export interface Planting {
   id: string;

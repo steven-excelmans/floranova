@@ -5,8 +5,8 @@
       <!-- Avatar -->
       <div class="planting-card__avatar">
         <q-img
-          v-if="plant && plant.images[0]"
-          :src="plant.images[0]"
+          v-if="coverUrl"
+          :src="coverUrl"
           fit="cover"
           class="planting-card__avatar-img"
         >
@@ -81,6 +81,7 @@ import { useQuasar } from 'quasar';
 import { useLocale } from 'src/composables/useLocale';
 import { usePlantStore } from 'src/stores/plant-store';
 import type { Planting } from 'src/types/planting';
+import { getCoverImage } from 'src/types/plant';
 import { buildPlantingTimeline, getNextAction } from 'src/composables/usePlantingTimeline';
 import PlantingTimeline from './PlantingTimeline.vue';
 
@@ -98,6 +99,7 @@ const plantStore = usePlantStore();
 const expanded = ref(false);
 
 const plant = computed(() => plantStore.getPlantById(props.planting.plantId));
+const coverUrl = computed(() => plant.value ? getCoverImage(plant.value.images)?.url ?? null : null);
 
 const timeline = computed(() =>
   plant.value ? buildPlantingTimeline(props.planting, plant.value) : [],
@@ -145,7 +147,6 @@ const statusLabel = computed(() => {
 const locationIcon = computed(() => {
   switch (props.planting.location) {
     case 'indoor': return 'home';
-    case 'greenhouse': return 'filter_drama';
     case 'cold-greenhouse': return 'ac_unit';
     case 'outdoor': return 'park';
     default: return 'home';
