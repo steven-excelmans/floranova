@@ -14,7 +14,7 @@
   --moss: #5C6B4E;
   --moss-light: #6E7D5F;
   --moss-pale: #E6EBE2;
-  --moss-ghost: #F0F3ED;
+  --moss-ghost: rgba(92, 107, 78, 0.05);
   --clay: #B8886E;
   --clay-light: #CDAB94;
   --clay-pale: #F3E8DF;
@@ -46,12 +46,12 @@
   --cal-empty: #E8E3DB;
 
   // Status colors (garden)
-  --overdue: #C25B4E;
-  --overdue-bg: #F8E8E5;
-  --soon: #D4A24E;
-  --soon-bg: #FDF3E2;
+  --overdue: #C0675A;
+  --overdue-bg: rgba(192, 103, 90, 0.1);
+  --soon: #C4973E;
+  --soon-bg: rgba(196, 151, 62, 0.1);
   --ok: #5C6B4E;
-  --ok-bg: #E8F0E5;
+  --ok-bg: rgba(92, 107, 78, 0.08);
 
   // Plant status colors (admin)
   --status-pending: var(--clay);

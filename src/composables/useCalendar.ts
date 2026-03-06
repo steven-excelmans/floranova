@@ -1,6 +1,6 @@
 import type { MonthRange, Plant } from 'src/types/plant';
 
-export type CalendarAction = 'indoorSowing' | 'coldGreenhouse' | 'outdoor';
+export type CalendarAction = 'indoorSowing' | 'coldGreenhouse' | 'outdoor' | 'harvestPeriod';
 
 export function isMonthInRange(month: number, range: MonthRange): boolean {
   if (!range) return false;

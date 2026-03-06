@@ -1,5 +1,4 @@
 <template>
-  <!-- display: contents — name cell + 12 month cells live directly in the parent grid -->
   <div class="plant-row">
     <!-- Sticky name column -->
     <div class="plant-name" @click="$emit('select', plant.id)">
@@ -10,7 +9,7 @@
           :alt="displayName"
           loading="lazy"
         />
-        <span v-else class="material-icons-outlined">local_florist</span>
+        <span v-else class="material-icons-outlined">{{ plantIcon }}</span>
       </div>
       <div class="plant-name__text">
         <div class="plant-name__variety">{{ plant.variety ?? displayName }}</div>
@@ -18,16 +17,25 @@
       </div>
     </div>
 
-    <!-- 12 month cells -->
+    <!-- 12 month cells — fixed 3-slot layout -->
     <div
       v-for="m in 12"
       :key="m"
       class="timeline-cell"
       :class="{ 'timeline-cell--current': m === currentMonth }"
     >
-      <div v-if="hasAction(m, 'indoorSowing')" class="bar bar--indoor" />
-      <div v-if="hasAction(m, 'coldGreenhouse')" class="bar bar--cold" />
-      <div v-if="hasAction(m, 'outdoor')" class="bar bar--outdoor" />
+      <div class="bar-slot">
+        <div v-if="hasAction(m, 'indoorSowing')" class="bar bar--indoor" />
+      </div>
+      <div class="bar-slot">
+        <div v-if="hasAction(m, 'coldGreenhouse')" class="bar bar--cold" />
+      </div>
+      <div class="bar-slot">
+        <div v-if="hasAction(m, 'outdoor')" class="bar bar--outdoor" />
+      </div>
+      <div class="bar-slot">
+        <div v-if="hasAction(m, 'harvestPeriod')" class="bar bar--bloom" />
+      </div>
     </div>
   </div>
 </template>
@@ -35,7 +43,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Plant } from 'src/types/plant';
-import { getCoverImage } from 'src/types/plant';
+import { getCardPreviewImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
 import { isMonthInRange, getCurrentMonth, type CalendarAction } from 'src/composables/useCalendar';
 
@@ -44,9 +52,15 @@ defineEmits<{ select: [id: string] }>();
 
 const { localize } = useLocale();
 const currentMonth = getCurrentMonth();
-const coverUrl = computed(() => getCoverImage(props.plant.images)?.url ?? null);
-
+const coverUrl = computed(() => getCardPreviewImage(props.plant.images)?.url ?? null);
 const displayName = computed(() => localize(props.plant.name));
+
+const plantIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'grass',
+  vegetable: 'spa',
+};
+const plantIcon = computed(() => plantIconMap[props.plant.type] ?? 'local_florist');
 
 function hasAction(month: number, action: CalendarAction): boolean {
   const range = props.plant.calendar[action];
@@ -56,12 +70,9 @@ function hasAction(month: number, action: CalendarAction): boolean {
 </script>
 
 <style scoped lang="scss">
-/* display: contents — this wrapper is invisible in the layout; children
-   participate directly in the parent CSS grid */
 .plant-row {
   display: contents;
 
-  /* When any cell in this row is hovered, tint all cells */
   &:hover .plant-name,
   &:hover .timeline-cell {
     background: rgba(245, 240, 232, 0.94);
@@ -143,31 +154,37 @@ function hasAction(month: number, action: CalendarAction): boolean {
   }
 }
 
-/* Month cell */
+/* Month cell — always 3 fixed slots */
 .timeline-cell {
-  padding: 6px 2px;
+  padding: 4px 2px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   justify-content: center;
   align-items: stretch;
   transition: background 0.15s;
 
   &--current {
-    background: rgba(92, 107, 78, 0.07);
+    background: rgba(92, 107, 78, 0.06);
   }
+}
+
+/* Fixed-height slot — always takes space even when empty */
+.bar-slot {
+  height: 5px;
 }
 
 /* Colored bars */
 .bar {
-  height: 6px;
-  border-radius: 3px;
+  height: 5px;
+  border-radius: 2.5px;
   opacity: 0.85;
   transition: opacity 0.15s;
 
   &--indoor  { background: var(--cal-indoor); }
   &--cold    { background: var(--cal-cold); }
   &--outdoor { background: var(--cal-outdoor); }
+  &--bloom   { background: var(--cal-bloom); }
 }
 </style>

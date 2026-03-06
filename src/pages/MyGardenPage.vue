@@ -1,18 +1,18 @@
 <template>
   <q-page class="garden-page">
-    <!-- View toggle -->
-    <div class="garden-header">
-      <div class="view-toggle">
+    <!-- Top bar: toggle + filter (same as calendar) -->
+    <div class="top-bar">
+      <div class="seg-toggle">
         <button
-          class="view-toggle__btn"
-          :class="{ 'view-toggle__btn--active': activeTab === 'plantings' }"
+          class="seg-toggle__btn"
+          :class="{ 'seg-toggle__btn--active': activeTab === 'plantings' }"
           @click="activeTab = 'plantings'"
         >
           {{ t('garden.myPlantings') }}
         </button>
         <button
-          class="view-toggle__btn"
-          :class="{ 'view-toggle__btn--active': activeTab === 'upcoming' }"
+          class="seg-toggle__btn"
+          :class="{ 'seg-toggle__btn--active': activeTab === 'upcoming' }"
           @click="activeTab = 'upcoming'"
         >
           {{ t('garden.upcomingActions') }}
@@ -63,45 +63,48 @@ const showAddDialog = ref(false);
   flex-direction: column;
 }
 
-.garden-header {
-  background: var(--warm-white);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-light);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+/* ── Top bar — matches calendar ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  gap: 12px;
 }
 
-.view-toggle {
+/* ── Segmented toggle — matches calendar ── */
+.seg-toggle {
   display: flex;
-  background: var(--sand);
+  background: var(--border-light);
   border-radius: var(--radius-pill);
   padding: 3px;
+  gap: 2px;
 }
 
-.view-toggle__btn {
-  flex: 1;
-  padding: 8px 16px;
+.seg-toggle__btn {
+  padding: 7px 16px;
   border: none;
   background: transparent;
-  border-radius: 22px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--muted);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  line-height: 1;
 
-  &.view-toggle__btn--active {
+  &--active {
     background: var(--warm-white);
     color: var(--deep-brown);
-    box-shadow: 0 1px 6px rgba(53, 43, 34, 0.08);
     font-weight: 600;
+    box-shadow: 0 1px 6px rgba(53, 43, 34, 0.08);
   }
 }
 
 .garden-content {
-  padding: 16px 16px 110px;
+  padding: 12px 16px 80px;
   flex: 1;
 }
 
@@ -112,7 +115,7 @@ const showAddDialog = ref(false);
   right: 20px;
   width: 48px;
   height: 48px;
-  border-radius: 14px;
+  border-radius: 50%;
   background: var(--moss);
   color: #fff;
   border: none;

@@ -1,113 +1,143 @@
 <template>
-  <div class="planting-card">
-    <!-- Card Header (clickable to expand/collapse) -->
-    <div class="planting-card__header" @click="expanded = !expanded">
-      <!-- Avatar -->
-      <div class="planting-card__avatar">
+  <div class="va-card">
+    <!-- Header: avatar + info + badge -->
+    <div class="va-card-header">
+      <div class="va-avatar" :class="plant?.type">
         <q-img
           v-if="coverUrl"
           :src="coverUrl"
           fit="cover"
-          class="planting-card__avatar-img"
+          class="va-avatar-img"
         >
           <template #error>
-            <span class="material-icons-outlined">local_florist</span>
+            <span class="material-icons-outlined">{{ plantIcon }}</span>
           </template>
         </q-img>
-        <span v-else class="material-icons-outlined">local_florist</span>
+        <span v-else class="material-icons-outlined">{{ plantIcon }}</span>
       </div>
 
-      <!-- Info -->
-      <div class="planting-card__info">
-        <div class="planting-card__name">
-          {{ plant ? localize(plant.name) : planting.plantId }}
-        </div>
-        <div class="planting-card__meta">
-          <span class="planting-card__meta-item">
-            <span class="material-icons-outlined">event</span>
+      <div class="va-info">
+        <div class="va-name">{{ plant ? localize(plant.name) : planting.plantId }}</div>
+        <div class="va-meta">
+          <span class="va-meta-item">
+            <span class="material-icons-outlined icon-xs">calendar_today</span>
             {{ formatShortDate(planting.dateSeeded) }}
           </span>
-          <span class="planting-card__meta-item">
-            <span class="material-icons-outlined">tag</span>
+          <span class="va-meta-item">
+            <span class="material-icons-outlined icon-xs">tag</span>
             {{ planting.amount }}
           </span>
-          <span class="planting-card__meta-item">
-            <span class="material-icons-outlined">{{ locationIcon }}</span>
+          <span class="va-meta-item">
+            <span class="material-icons-outlined icon-xs">{{ locationIcon }}</span>
             {{ t(`garden.${planting.location}`) }}
           </span>
         </div>
-        <div v-if="planting.notes" class="planting-card__notes">{{ planting.notes }}</div>
       </div>
 
-      <!-- Status badge -->
-      <div v-if="nextAction" class="status-badge" :class="statusBadgeClass">
-        <span class="material-icons-outlined">{{ statusIcon }}</span>
-        {{ statusLabel }}
+      <div class="va-badge-area">
+        <span class="badge" :class="statusClass">{{ statusLabel }}</span>
       </div>
     </div>
 
-    <!-- Timeline (slide transition) -->
-    <q-slide-transition>
-      <div v-if="expanded">
-        <PlantingTimeline
-          :events="timeline"
-          @complete="$emit('complete', planting.id, $event)"
+    <!-- Notes (if any) — shown between header and progress like mock -->
+    <div v-if="planting.notes" class="va-notes">
+      <span class="material-icons-outlined icon-xs">sticky_note_2</span>
+      "{{ planting.notes }}"
+    </div>
+
+    <!-- Progress bar -->
+    <div class="va-progress-section">
+      <div class="va-progress-label">
+        <span>{{ t('garden.progress') }}</span>
+        <span>{{ completedCount }} / {{ totalSteps }} {{ t('garden.steps') }}</span>
+      </div>
+      <div class="va-progress-track">
+        <div
+          class="va-progress-fill"
+          :class="progressClass"
+          :style="{ width: progressPercent + '%' }"
         />
       </div>
-    </q-slide-transition>
+    </div>
 
-    <!-- Toggle footer -->
-    <div
-      class="planting-card__toggle"
-      :class="{ 'planting-card__toggle--expanded': expanded }"
-      @click="expanded = !expanded"
-    >
-      <span class="material-icons-outlined">expand_more</span>
-      <button
-        class="planting-card__delete"
-        @click.stop="confirmDelete"
-        :aria-label="t('garden.delete')"
+    <!-- Milestones row -->
+    <div v-if="timeline.length > 0" class="va-milestones">
+      <span
+        v-for="event in timeline"
+        :key="event.id"
+        class="va-milestone"
+        :class="{
+          done: event.completed,
+          active: !event.completed && event.id === nextAction?.id,
+        }"
       >
-        <span class="material-icons-outlined">delete_outline</span>
-      </button>
+        {{ localize(event.action) }}
+      </span>
+    </div>
+
+    <!-- Next action footer -->
+    <div v-if="nextAction" class="va-next-action" :class="nextActionColorClass">
+      <span class="material-icons-outlined">{{ nextActionIcon }}</span>
+      <span>
+        <strong>{{ localize(nextAction.action) }}</strong>
+        <template v-if="daysUntilNext !== null && daysUntilNext < 0">
+          &mdash; {{ Math.abs(daysUntilNext) }} {{ t('garden.daysAgo') }}
+        </template>
+        <template v-else-if="daysUntilNext === 0">
+          &mdash; {{ t('garden.today') }}
+        </template>
+        <template v-else-if="daysUntilNext !== null">
+          &mdash; {{ t('garden.in') }} {{ daysUntilNext }}d
+        </template>
+        <template v-else-if="!nextAction.expectedDate">
+          &mdash; {{ t('garden.conditionBased') }}
+        </template>
+      </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
 import { useLocale } from 'src/composables/useLocale';
 import { usePlantStore } from 'src/stores/plant-store';
 import type { Planting } from 'src/types/planting';
 import { getCoverImage } from 'src/types/plant';
 import { buildPlantingTimeline, getNextAction } from 'src/composables/usePlantingTimeline';
-import PlantingTimeline from './PlantingTimeline.vue';
 
 const props = defineProps<{ planting: Planting }>();
-const emit = defineEmits<{
+defineEmits<{
   delete: [id: string];
   complete: [plantingId: string, milestoneId: string];
 }>();
 
 const { t } = useI18n();
-const $q = useQuasar();
 const { localize } = useLocale();
 const plantStore = usePlantStore();
-
-const expanded = ref(false);
 
 const plant = computed(() => plantStore.getPlantById(props.planting.plantId));
 const coverUrl = computed(() => plant.value ? getCoverImage(plant.value.images)?.url ?? null : null);
 
+const plantIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'grass',
+  vegetable: 'spa',
+};
+const plantIcon = computed(() => plantIconMap[plant.value?.type ?? 'flower'] ?? 'local_florist');
+
 const timeline = computed(() =>
   plant.value ? buildPlantingTimeline(props.planting, plant.value) : [],
 );
-
 const nextAction = computed(() => getNextAction(timeline.value));
 
-const daysUntilNextAction = computed(() => {
+const totalSteps = computed(() => timeline.value.length);
+const completedCount = computed(() => timeline.value.filter((e) => e.completed).length);
+const progressPercent = computed(() =>
+  totalSteps.value > 0 ? Math.round((completedCount.value / totalSteps.value) * 100) : 0,
+);
+
+const daysUntilNext = computed(() => {
   if (!nextAction.value?.expectedDate) return null;
   const now = new Date();
   now.setHours(0, 0, 0, 0);
@@ -116,38 +146,39 @@ const daysUntilNextAction = computed(() => {
   return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 });
 
-const statusBadgeClass = computed(() => {
-  if (!nextAction.value) return '';
-  // Condition-based (no expected date) = observe
-  if (!nextAction.value.expectedDate) return 'status-badge--observe';
-  const diff = daysUntilNextAction.value;
-  if (diff === null) return 'status-badge--observe';
-  if (diff < 0) return 'status-badge--overdue';
-  if (diff <= 7) return 'status-badge--soon';
-  return 'status-badge--observe';
+// Urgency state
+type Urgency = 'overdue' | 'soon' | 'ok';
+const urgency = computed<Urgency>(() => {
+  if (!nextAction.value) return 'ok';
+  if (!nextAction.value.expectedDate) return 'ok';
+  const d = daysUntilNext.value;
+  if (d === null) return 'ok';
+  if (d < 0) return 'overdue';
+  if (d <= 7) return 'soon';
+  return 'ok';
 });
 
-const statusIcon = computed(() => {
-  const cls = statusBadgeClass.value;
-  if (cls === 'status-badge--overdue') return 'warning_amber';
-  if (cls === 'status-badge--soon') return 'schedule';
-  return 'visibility';
-});
-
+const statusClass = computed(() => `badge--${urgency.value}`);
 const statusLabel = computed(() => {
-  if (!nextAction.value) return '';
-  const diff = daysUntilNextAction.value;
-  if (diff === null) return t('garden.conditionBased');
-  if (diff < 0) return `${Math.abs(diff)}d ${t('garden.daysAgo')}`;
-  if (diff === 0) return t('garden.today');
-  if (diff <= 7) return `${t('garden.in')} ${diff}d`;
-  return t('garden.conditionBased');
+  if (urgency.value === 'overdue') return t('garden.overdue');
+  if (urgency.value === 'soon') return t('garden.dueSoon');
+  return t('garden.onTrack');
+});
+
+const progressClass = computed(() => urgency.value);
+
+const nextActionColorClass = computed(() => urgency.value);
+const nextActionIcon = computed(() => {
+  if (urgency.value === 'overdue') return 'warning';
+  if (urgency.value === 'soon') return 'schedule';
+  if (!nextAction.value?.expectedDate) return 'visibility';
+  return 'check_circle';
 });
 
 const locationIcon = computed(() => {
   switch (props.planting.location) {
     case 'indoor': return 'home';
-    case 'cold-greenhouse': return 'ac_unit';
+    case 'cold-greenhouse': return 'warehouse';
     case 'outdoor': return 'park';
     default: return 'home';
   }
@@ -157,225 +188,195 @@ function formatShortDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
-
-function confirmDelete() {
-  $q.dialog({
-    title: t('garden.delete'),
-    message: t('garden.deleteConfirm'),
-    cancel: true,
-  }).onOk(() => {
-    emit('delete', props.planting.id);
-  });
-}
 </script>
 
 <style lang="scss" scoped>
-.planting-card {
+.va-card {
   background: var(--warm-white);
   border-radius: var(--radius-card);
-  overflow: hidden;
+  box-shadow: var(--shadow-card);
   margin-bottom: 14px;
-  box-shadow: 0 2px 12px rgba(53, 43, 34, 0.06);
-  transition: box-shadow 0.3s ease;
-  animation: fadeInCard 0.4s ease both;
-
-  &:hover {
-    box-shadow: 0 4px 20px rgba(53, 43, 34, 0.1);
-  }
-
-  &:nth-child(2) { animation-delay: 0.06s; }
-  &:nth-child(3) { animation-delay: 0.12s; }
-  &:nth-child(4) { animation-delay: 0.18s; }
+  overflow: hidden;
 }
 
-.planting-card__header {
+/* Header */
+.va-card-header {
   display: flex;
   align-items: flex-start;
+  padding: 16px 16px 0;
   gap: 12px;
-  padding: 16px 18px;
-  cursor: pointer;
 }
 
-.planting-card__avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--sand);
+.va-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  position: relative;
   overflow: hidden;
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 14px;
-    border: 1px solid rgba(92, 107, 78, 0.08);
-  }
+  &.flower { background: var(--flower-bg); color: var(--flower); }
+  &.herb { background: var(--herb-bg); color: var(--herb); }
+  &.vegetable { background: var(--veg-bg); color: var(--veg); }
 
   .material-icons-outlined {
     font-size: 24px;
-    color: var(--moss);
-    opacity: 0.6;
   }
 }
 
-.planting-card__avatar-img {
+.va-avatar-img {
   width: 100%;
   height: 100%;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
-.planting-card__info {
+.va-info {
   flex: 1;
   min-width: 0;
-  padding-top: 2px;
 }
 
-.planting-card__name {
+.va-name {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--deep-brown);
   margin-bottom: 4px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.planting-card__meta {
+.va-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
   flex-wrap: wrap;
 }
 
-.planting-card__meta-item {
+.va-meta-item {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 400;
-
-  .material-icons-outlined {
-    font-size: 14px;
-    opacity: 0.7;
-  }
 }
 
-.planting-card__notes {
-  font-size: 11.5px;
-  color: var(--muted-light);
-  font-style: italic;
-  margin-top: 4px;
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.icon-xs {
+  font-size: 14px !important;
 }
 
-/* Status Badge */
-.status-badge {
+.va-badge-area {
+  flex-shrink: 0;
+}
+
+/* Badge — shared style */
+.badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
+  gap: 4px;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-top: 2px;
+  line-height: 1;
 
-  .material-icons-outlined {
-    font-size: 14px;
-  }
-
-  &.status-badge--overdue {
-    background: var(--overdue-bg);
-    color: var(--overdue);
-  }
-
-  &.status-badge--soon {
-    background: var(--soon-bg);
-    color: var(--soon);
-  }
-
-  &.status-badge--observe {
-    background: var(--ok-bg);
-    color: var(--ok);
-  }
+  &--overdue { background: var(--overdue-bg); color: var(--overdue); }
+  &--soon { background: var(--soon-bg); color: var(--soon); }
+  &--ok { background: var(--ok-bg); color: var(--ok); }
 }
 
-/* Toggle footer */
-.planting-card__toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 18px;
-  cursor: pointer;
+/* Notes — between header and progress */
+.va-notes {
+  padding: 0 16px 10px;
+  font-size: 12px;
   color: var(--muted);
-  transition: color 0.2s, background 0.2s;
-  border-top: 1px solid var(--sand);
-  position: relative;
-
-  &:hover {
-    color: var(--moss);
-    background: rgba(92, 107, 78, 0.03);
-  }
+  font-style: italic;
 
   .material-icons-outlined {
-    font-size: 20px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  &.planting-card__toggle--expanded {
-    .material-icons-outlined:first-child {
-      transform: rotate(180deg);
-    }
+    vertical-align: middle;
+    margin-right: 2px;
   }
 }
 
-.planting-card__delete {
-  position: absolute;
-  right: 14px;
+/* Progress section */
+.va-progress-section {
+  padding: 12px 16px 14px;
+}
+
+.va-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.va-progress-track {
+  height: 6px;
+  background: var(--sand);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.va-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+
+  &.overdue { background: var(--overdue); }
+  &.soon { background: var(--soon); }
+  &.ok { background: var(--moss); }
+}
+
+/* Milestones row */
+.va-milestones {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px 6px;
+  margin-top: -2px;
+}
+
+.va-milestone {
+  font-size: 10px;
+  color: var(--muted-light);
+  text-align: center;
+
+  &.active {
+    color: var(--deep-brown);
+    font-weight: 600;
+  }
+
+  &.done {
+    color: var(--moss);
+  }
+}
+
+/* Next action footer */
+.va-next-action {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--muted-light);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
 
   .material-icons-outlined {
-    font-size: 18px;
-    transition: none;
+    font-size: 16px;
   }
 
-  &:hover {
-    background: var(--overdue-bg);
+  &.overdue {
     color: var(--overdue);
+    background: var(--overdue-bg);
   }
-}
 
-@keyframes fadeInCard {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+  &.soon {
+    color: var(--soon);
+    background: var(--soon-bg);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  &.ok {
+    color: var(--ok);
+    background: var(--ok-bg);
   }
 }
 </style>

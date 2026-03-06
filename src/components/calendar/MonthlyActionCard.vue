@@ -7,42 +7,71 @@
         :alt="displayName"
         loading="lazy"
       />
-      <span v-else class="material-icons-outlined">local_florist</span>
+      <span v-else class="material-icons-outlined">{{ plantIcon }}</span>
     </div>
 
     <div class="monthly-card__info">
       <div class="monthly-card__name">{{ displayName }}</div>
       <div class="monthly-card__latin">{{ plant.latinName }}</div>
+
+      <!-- Mini bloom/harvest bar -->
+      <div v-if="harvestMonths && harvestMonths.length" class="bloom-bar">
+        <div
+          v-for="m in 12"
+          :key="m"
+          class="bloom-bar__seg"
+          :class="{
+            'bloom-bar__seg--active': harvestMonths.includes(m),
+            'bloom-bar__seg--current': m === currentMonth && harvestMonths.includes(m),
+          }"
+        />
+      </div>
     </div>
 
-    <PlantTypeBadge :type="plant.type" />
+    <div class="type-icon" :class="plant.type">
+      <span class="material-icons-outlined">{{ plantIcon }}</span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Plant } from 'src/types/plant';
-import { getCoverImage } from 'src/types/plant';
+import { getCardPreviewImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
-import PlantTypeBadge from 'src/components/shared/PlantTypeBadge.vue';
 
-const props = defineProps<{ plant: Plant }>();
-const coverUrl = computed(() => getCoverImage(props.plant.images)?.url ?? null);
+const props = defineProps<{
+  plant: Plant;
+  currentMonth: number;
+}>();
 defineEmits<{ select: [id: string] }>();
 
 const { localize } = useLocale();
 const displayName = computed(() => localize(props.plant.name));
+const coverUrl = computed(() => {
+  const img = getCardPreviewImage(props.plant.images);
+  return img?.url ?? null;
+});
+
+const plantIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'grass',
+  vegetable: 'spa',
+};
+const plantIcon = computed(() => plantIconMap[props.plant.type] ?? 'local_florist');
+
+const harvestMonths = computed(() => props.plant.calendar.harvestPeriod);
 </script>
 
 <style scoped lang="scss">
 .monthly-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--warm-white);
   border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  margin: 0 20px 8px;
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid transparent;
@@ -62,6 +91,7 @@ const displayName = computed(() => localize(props.plant.name));
   &:nth-child(4) { animation-delay: 0.12s; }
   &:nth-child(5) { animation-delay: 0.16s; }
   &:nth-child(6) { animation-delay: 0.20s; }
+  &:nth-child(7) { animation-delay: 0.24s; }
 
   &__avatar {
     width: 44px;
@@ -107,6 +137,62 @@ const displayName = computed(() => localize(props.plant.name));
     color: var(--muted);
     font-style: italic;
     line-height: 1.3;
+  }
+}
+
+/* ── Type icon badge ── */
+.type-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: 15px;
+  }
+
+  &.flower {
+    background: var(--flower-bg);
+    color: var(--flower);
+  }
+
+  &.herb {
+    background: var(--herb-bg);
+    color: var(--herb);
+  }
+
+  &.vegetable {
+    background: var(--veg-bg);
+    color: var(--veg);
+  }
+}
+
+/* ── Bloom/harvest mini bar ── */
+.bloom-bar {
+  display: flex;
+  gap: 2px;
+  margin-top: 5px;
+}
+
+.bloom-bar__seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 1.5px;
+  background: var(--cal-empty, #E8E3DB);
+
+  &--active {
+    background: var(--cal-bloom);
+    opacity: 0.6;
+  }
+
+  &--current {
+    background: var(--cal-bloom);
+    opacity: 1;
+    height: 4px;
+    border-radius: 2px;
   }
 }
 

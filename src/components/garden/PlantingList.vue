@@ -42,8 +42,8 @@ function getNextActionDays(planting: Planting): number {
   if (!plant) return 999;
   const timeline = buildPlantingTimeline(planting, plant);
   const next = getNextAction(timeline);
-  if (!next) return 998; // all done
-  if (!next.expectedDate) return 500; // condition-based, middle priority
+  if (!next) return 998;
+  if (!next.expectedDate) return 500;
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const target = new Date(next.expectedDate);
@@ -51,7 +51,6 @@ function getNextActionDays(planting: Planting): number {
   return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-// Sort by most urgent first (overdue first, then soonest)
 const sortedPlantings = computed(() =>
   [...props.plantings].sort((a, b) => getNextActionDays(a) - getNextActionDays(b)),
 );

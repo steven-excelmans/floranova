@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { Plant, PlantType, SunRequirement, PropagationType } from 'src/types/plant';
 import { normalizeMonthRange } from 'src/types/plant';
-import { subscribePlants } from 'src/services/plant-service';
+import { subscribePlants, createPlant } from 'src/services/plant-service';
 import plantsData from 'src/data/plants';
 
 function normalizePlant(plant: Plant): Plant {
@@ -20,43 +20,26 @@ function normalizePlant(plant: Plant): Plant {
 }
 
 export const usePlantStore = defineStore('plants', () => {
-  const plants = ref<Plant[]>(plantsData.map(normalizePlant));
+  const plants = ref<Plant[]>([]);
   const search = ref('');
   const typeFilter = ref<PlantType | null>(null);
   const sunFilter = ref<SunRequirement | null>(null);
   const propagationFilter = ref<PropagationType | null>(null);
   const stockOnly = ref(false);
-  const firestoreLoaded = ref(false);
+  const loading = ref(true);
 
-  // Subscribe to Firestore plants — merge with static data
   let unsubscribe: (() => void) | null = null;
 
-  function initFirestore() {
+  function init() {
     if (unsubscribe) return;
     try {
       unsubscribe = subscribePlants((firestorePlants) => {
-        // Build a map of Firestore plants by ID (source of truth for overrides)
-        const firestoreMap = new Map(firestorePlants.map((p) => [p.id, p]));
-
-        // Start with static plants, merge Firestore overrides on top
-        const merged = plantsData.map((staticPlant) => {
-          const firestoreVersion = firestoreMap.get(staticPlant.id);
-          if (!firestoreVersion) return staticPlant;
-          // Spread static data first, then Firestore fields on top
-          return { ...staticPlant, ...firestoreVersion };
-        });
-
-        // Add any Firestore-only plants (not in static data)
-        const staticIds = new Set(plantsData.map((p) => p.id));
-        for (const fp of firestorePlants) {
-          if (!staticIds.has(fp.id)) merged.push(fp);
-        }
-
-        plants.value = merged.map(normalizePlant);
-        firestoreLoaded.value = true;
+        plants.value = firestorePlants.map(normalizePlant);
+        loading.value = false;
       });
     } catch {
-      // Firebase not configured — keep using static data
+      // Firebase not configured — stay empty
+      loading.value = false;
     }
   }
 
@@ -66,7 +49,23 @@ export const usePlantStore = defineStore('plants', () => {
   }
 
   // Auto-init when store is used
-  initFirestore();
+  init();
+
+  /**
+   * Migrate static seed data to Firestore.
+   * Only creates plants that don't already exist in Firestore.
+   * Returns the number of plants migrated.
+   */
+  async function migrateStaticData(): Promise<number> {
+    const existingIds = new Set(plants.value.map((p) => p.id));
+    const toMigrate = plantsData.filter((p) => !existingIds.has(p.id));
+
+    for (const plant of toMigrate) {
+      await createPlant(normalizePlant(plant));
+    }
+
+    return toMigrate.length;
+  }
 
   const filteredPlants = computed(() => {
     return plants.value.filter((plant) => {
@@ -138,12 +137,13 @@ export const usePlantStore = defineStore('plants', () => {
     sunFilter,
     propagationFilter,
     stockOnly,
-    firestoreLoaded,
+    loading,
     filteredPlants,
     groupedBySpecies,
     hasActiveFilter,
     getPlantById,
     resetFilters,
+    migrateStaticData,
     cleanup,
   };
 });

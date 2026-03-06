@@ -14,44 +14,56 @@
       :key="group.key"
       class="upcoming-group"
     >
-      <div class="upcoming-group__header">
-        <span class="upcoming-group__label">{{ group.label }}</span>
-        <span class="upcoming-group__count">{{ group.events.length }}</span>
+      <!-- Section divider: dot + label + line -->
+      <div class="section-divider">
+        <span class="dot" :class="`dot--${group.key}`" />
+        <span class="label">{{ group.label }}</span>
+        <span class="line" />
       </div>
 
+      <!-- Action cards -->
       <div
         v-for="event in group.events"
         :key="event.eventId"
-        class="upcoming-card"
+        class="action-card"
       >
         <!-- Plant avatar -->
-        <div class="upcoming-card__avatar">
+        <div class="plant-avatar" :class="event.plant?.type">
           <q-img
             v-if="event.plant && getCoverImage(event.plant.images)"
             :src="getCoverImage(event.plant.images)!.url"
             fit="cover"
-            class="upcoming-card__avatar-img"
+            class="plant-avatar__img"
           >
             <template #error>
-              <span class="material-icons-outlined">local_florist</span>
+              <span class="material-icons-outlined">{{ getPlantIcon(event.plant?.type) }}</span>
             </template>
           </q-img>
-          <span v-else class="material-icons-outlined">local_florist</span>
+          <span v-else class="material-icons-outlined">{{ getPlantIcon(event.plant?.type) }}</span>
         </div>
 
         <!-- Info -->
-        <div class="upcoming-card__info">
-          <div class="upcoming-card__action-name">{{ localize(event.action) }}</div>
-          <div class="upcoming-card__plant-name">{{ event.plant ? localize(event.plant.name) : '' }}</div>
-          <div v-if="localize(event.condition)" class="upcoming-card__condition">
+        <div class="action-info">
+          <div class="action-name">{{ localize(event.action) }}</div>
+          <div class="plant-name">{{ event.plant ? localize(event.plant.name) : '' }}</div>
+          <div v-if="localize(event.condition)" class="condition">
             {{ localize(event.condition) }}
           </div>
         </div>
 
         <!-- Time badge -->
-        <div class="time-badge" :class="timeBadgeClass(event)">
-          {{ timeBadgeLabel(event) }}
-        </div>
+        <span class="badge" :class="badgeClass(event)">
+          {{ badgeLabel(event) }}
+        </span>
+
+        <!-- Check button -->
+        <button
+          class="check-btn"
+          :title="t('garden.markDone')"
+          @click.stop="completeEvent(event)"
+        >
+          <span class="material-icons-outlined">check</span>
+        </button>
       </div>
     </div>
   </div>
@@ -74,6 +86,8 @@ const plantingStore = usePlantingStore();
 
 interface UpcomingEvent {
   eventId: string;
+  plantingId: string;
+  milestoneId: string;
   action: BilingualText;
   condition: BilingualText;
   expectedDate: Date | null;
@@ -97,9 +111,11 @@ const upcomingEvents = computed(() => {
       if (target) target.setHours(0, 0, 0, 0);
       const diff = target
         ? Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-        : 500; // condition-based: medium priority
+        : 500;
       events.push({
         eventId: `${planting.id}-${event.id}`,
+        plantingId: planting.id,
+        milestoneId: event.id,
         action: event.action,
         condition: event.condition,
         expectedDate: event.expectedDate,
@@ -144,20 +160,34 @@ const groupedEvents = computed<EventGroup[]>(() => {
   return groups;
 });
 
-function timeBadgeClass(event: UpcomingEvent): string {
-  if (event.daysUntil < 0) return 'time-badge--overdue';
-  if (!event.expectedDate) return 'time-badge--observe';
-  if (event.daysUntil <= 7) return 'time-badge--soon';
-  if (event.daysUntil <= 14) return 'time-badge--soon';
-  return 'time-badge--later';
+const plantIconMap: Record<string, string> = {
+  flower: 'local_florist',
+  herb: 'grass',
+  vegetable: 'spa',
+};
+
+function getPlantIcon(type?: string): string {
+  return plantIconMap[type ?? 'flower'] ?? 'local_florist';
 }
 
-function timeBadgeLabel(event: UpcomingEvent): string {
+function badgeClass(event: UpcomingEvent): string {
+  if (event.daysUntil < 0) return 'badge--overdue';
+  if (event.daysUntil === 0) return 'badge--today';
+  if (!event.expectedDate) return 'badge--observe';
+  if (event.daysUntil <= 7) return 'badge--soon';
+  if (event.daysUntil <= 14) return 'badge--later';
+  return 'badge--later';
+}
+
+function badgeLabel(event: UpcomingEvent): string {
   if (event.daysUntil < 0) return `${Math.abs(event.daysUntil)}d ${t('garden.daysAgo')}`;
   if (event.daysUntil === 0) return t('garden.today');
   if (!event.expectedDate) return t('garden.conditionBased');
-  if (event.daysUntil <= 500) return `${event.daysUntil}d`;
-  return t('garden.conditionBased');
+  return `${t('garden.in')} ${event.daysUntil}d`;
+}
+
+function completeEvent(event: UpcomingEvent) {
+  void plantingStore.completeMilestone(event.plantingId, event.milestoneId);
 }
 </script>
 
@@ -166,6 +196,7 @@ function timeBadgeLabel(event: UpcomingEvent): string {
   padding: 0;
 }
 
+/* Empty state */
 .empty-state {
   background: var(--warm-white);
   border-radius: var(--radius-card);
@@ -201,150 +232,153 @@ function timeBadgeLabel(event: UpcomingEvent): string {
   color: var(--deep-brown);
 }
 
-.upcoming-group {
-  margin-bottom: 22px;
-  animation: fadeInGroup 0.4s ease both;
-
-  &:nth-child(2) { animation-delay: 0.06s; }
-  &:nth-child(3) { animation-delay: 0.12s; }
-  &:nth-child(4) { animation-delay: 0.18s; }
-}
-
-.upcoming-group__header {
+/* Section divider: dot + label + line */
+.section-divider {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 4px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin: 20px 0 12px;
 }
 
-.upcoming-group__label {
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--overdue { background: var(--overdue); }
+  &--thisWeek { background: var(--soon); }
+  &--nextWeek { background: var(--moss); }
+  &--later { background: var(--muted-light); }
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+/* Action card */
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--warm-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+
+/* Plant avatar */
+.plant-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: 20px;
+
+  &.flower { background: var(--flower-bg); color: var(--flower); }
+  &.herb { background: var(--herb-bg); color: var(--herb); }
+  &.vegetable { background: var(--veg-bg); color: var(--veg); }
+
+  .material-icons-outlined {
+    font-size: 20px;
+  }
+}
+
+.plant-avatar__img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+}
+
+/* Action info */
+.action-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.action-name {
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 600;
   color: var(--deep-brown);
 }
 
-.upcoming-group__count {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
+.plant-name {
+  font-size: 13px;
   color: var(--muted);
-  background: var(--sand);
-  padding: 2px 9px;
-  border-radius: var(--radius-sm);
-}
-
-.upcoming-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--warm-white);
-  border-radius: 16px;
-  margin-bottom: 8px;
-  transition: box-shadow 0.2s, transform 0.15s;
-
-  &:hover {
-    box-shadow: 0 4px 16px rgba(53, 43, 34, 0.08);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.upcoming-card__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--sand);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-
-  .material-icons-outlined {
-    font-size: 20px;
-    color: var(--moss);
-    opacity: 0.5;
-  }
-}
-
-.upcoming-card__avatar-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-}
-
-.upcoming-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.upcoming-card__action-name {
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--deep-brown);
-  line-height: 1.3;
-}
-
-.upcoming-card__plant-name {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 400;
   margin-top: 1px;
 }
 
-.upcoming-card__condition {
-  font-size: 11.5px;
-  color: var(--clay);
-  font-style: italic;
-  margin-top: 2px;
-  line-height: 1.3;
+.condition {
+  font-size: 11px;
+  color: var(--muted-light);
+  margin-top: 4px;
 }
 
-.time-badge {
-  flex-shrink: 0;
-  font-family: var(--font-body);
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 11px;
-  border-radius: var(--radius-pill);
+  line-height: 1;
+  flex-shrink: 0;
   white-space: nowrap;
 
-  &.time-badge--overdue {
-    background: var(--overdue-bg);
-    color: var(--overdue);
-  }
-
-  &.time-badge--soon {
-    background: var(--soon-bg);
-    color: var(--soon);
-  }
-
-  &.time-badge--observe {
-    background: var(--ok-bg);
-    color: var(--ok);
-  }
-
-  &.time-badge--later {
-    background: var(--sand);
-    color: var(--muted);
-  }
+  &--overdue { background: var(--overdue-bg); color: var(--overdue); }
+  &--today { background: var(--soon-bg); color: var(--soon); }
+  &--soon { background: var(--ok-bg); color: var(--ok); }
+  &--observe { background: var(--moss-pale); color: var(--moss); }
+  &--later { background: var(--sand); color: var(--muted); }
 }
 
-@keyframes fadeInGroup {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+/* Check button */
+.check-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  color: transparent;
+
+  &:hover {
+    border-color: var(--moss);
+    background: var(--moss-pale);
+    color: var(--moss);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
   }
 }
 </style>

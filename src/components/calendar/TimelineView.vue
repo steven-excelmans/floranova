@@ -14,6 +14,10 @@
         <div class="legend-dot legend-dot--outdoor" />
         {{ t('calendar.outdoor') }}
       </div>
+      <div class="legend-item">
+        <div class="legend-dot legend-dot--bloom" />
+        {{ t('plant.bloom') }}
+      </div>
     </div>
 
     <!-- Horizontally scrollable grid -->
@@ -33,7 +37,7 @@
         <!-- Separator below months -->
         <div class="timeline-separator" />
 
-        <!-- Plant rows — each uses display:contents -->
+        <!-- Plant rows -->
         <TimelineRow
           v-for="plant in plants"
           :key="plant.id"
@@ -67,9 +71,9 @@ const scrollContainer = ref<HTMLElement>();
 
 onMounted(() => {
   if (scrollContainer.value) {
-    // Column 0 = name (148px), each month col ~40px
-    // Scroll so that current month is roughly centered
-    const targetScroll = 148 + (currentMonth - 2) * 40 - 60;
+    // Scroll so current month is the first visible column (after sticky name)
+    const monthColWidth = 42;
+    const targetScroll = (currentMonth - 1) * monthColWidth;
     scrollContainer.value.scrollLeft = Math.max(0, targetScroll);
   }
 });
@@ -108,6 +112,7 @@ onMounted(() => {
   &--indoor  { background: var(--cal-indoor); }
   &--cold    { background: var(--cal-cold); }
   &--outdoor { background: var(--cal-outdoor); }
+  &--bloom   { background: var(--cal-bloom); }
 }
 
 /* Scroll container */
@@ -125,9 +130,9 @@ onMounted(() => {
 /* Grid */
 .timeline-grid {
   display: grid;
-  grid-template-columns: 148px repeat(12, minmax(40px, 1fr));
-  min-width: 648px;
-  padding: 0 8px 0 0;
+  grid-template-columns: 180px repeat(12, minmax(42px, 1fr));
+  min-width: 684px;
+  padding: 0 6px 0 0;
 }
 
 /* Sticky corner cell (top-left) */
@@ -148,23 +153,10 @@ onMounted(() => {
   color: var(--muted);
   padding: 10px 0 8px;
   letter-spacing: 0.3px;
-  position: relative;
 
   &--current {
     color: var(--moss);
     font-weight: 700;
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--moss);
-    }
   }
 }
 
