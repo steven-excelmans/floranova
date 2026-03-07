@@ -7,69 +7,28 @@
       {{ t('admin.addPlantNamesDescAfter') }}
     </p>
 
-    <!-- Section label -->
-    <div class="section-label">
-      <div class="section-label__icon">
-        <span class="material-icons-outlined">edit_note</span>
-      </div>
-      <span class="section-label__text">{{ t('admin.newPlants') }}</span>
-      <span class="section-label__line" />
-    </div>
-
-    <!-- Add button (top) -->
-    <button class="add-btn" @click="addRow">
-      <span class="material-icons-outlined">add</span>
-      {{ t('admin.addAnother') }}
-    </button>
-
-    <!-- Input cards -->
-    <div class="input-cards">
-      <div
-        v-for="(row, index) in rows"
-        :key="index"
-        class="input-card"
-      >
-        <button class="input-card__remove" @click="removeRow(index)">
-          <span class="material-icons-outlined">close</span>
-        </button>
-        <div class="input-card__fields">
-          <div class="field">
-            <span class="field__label">
-              {{ t('admin.speciesLabel') }}
-              <span class="field__required">*</span>
-            </span>
-            <input
-              v-model="row.species"
-              type="text"
-              class="field__input"
-              :class="{ 'field__input--filled': row.species.trim() }"
-              :placeholder="t('admin.speciesPlaceholder')"
-            />
-          </div>
-          <div class="field">
-            <span class="field__label">
-              {{ t('admin.cultivarLabel') }}
-              <span class="field__optional">{{ t('admin.cultivarOptional') }}</span>
-            </span>
-            <input
-              v-model="row.variety"
-              type="text"
-              class="field__input"
-              :class="{ 'field__input--filled': row.variety.trim() }"
-              :placeholder="t('admin.varietyOptional')"
-            />
-          </div>
-        </div>
-      </div>
+    <!-- Input field -->
+    <div class="field">
+      <span class="field__label">
+        {{ t('admin.plantNameLabel') }}
+        <span class="field__required">*</span>
+      </span>
+      <input
+        ref="inputEl"
+        v-model="plantName"
+        type="text"
+        class="field__input"
+        :class="{ 'field__input--filled': plantName.trim() }"
+        :placeholder="t('admin.plantNamePlaceholder')"
+        @keyup.enter="save"
+      />
+      <span class="field__hint">{{ t('admin.plantNameHint') }}</span>
     </div>
 
     <!-- Save button -->
-    <button class="save-btn" :disabled="!hasValidRows" @click="saveAll">
+    <button class="save-btn" :disabled="!plantName.trim()" @click="save">
       <span class="material-icons-outlined">check_circle</span>
       {{ t('admin.save') }}
-      <span v-if="validRowCount > 0" class="save-btn__count">
-        {{ validRowCount }} {{ validRowCount !== 1 ? t('admin.plantsWord') : t('admin.plant') }}
-      </span>
     </button>
 
     <!-- Pending plants section -->
@@ -143,12 +102,8 @@ const $q = useQuasar();
 const { t } = useI18n();
 const plantStore = usePlantStore();
 
-interface NameRow {
-  species: string;
-  variety: string;
-}
-
-const rows = ref<NameRow[]>([{ species: '', variety: '' }]);
+const plantName = ref('');
+const inputEl = ref<HTMLInputElement>();
 
 const selectedIds = ref(new Set<string>());
 
@@ -162,25 +117,8 @@ const allSelected = computed(
 
 const hasSelection = computed(() => selectedIds.value.size > 0);
 
-const validRows = computed(() => rows.value.filter((r) => r.species.trim()));
-const validRowCount = computed(() => validRows.value.length);
-const hasValidRows = computed(() => validRowCount.value > 0);
-
-function addRow() {
-  rows.value.unshift({ species: '', variety: '' });
-}
-
-function removeRow(index: number) {
-  if (rows.value.length > 1) {
-    rows.value.splice(index, 1);
-  } else {
-    rows.value[0] = { species: '', variety: '' };
-  }
-}
-
-function generateId(species: string, variety: string): string {
-  const parts = [species, variety].filter(Boolean).join(' ');
-  return parts.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function generateId(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 function toggleAll() {
@@ -224,47 +162,44 @@ function deleteSelectedPending() {
   });
 }
 
-async function saveAll() {
-  let saved = 0;
-  for (const row of validRows.value) {
-    const species = row.species.trim();
-    const variety = row.variety.trim() || null;
-    const id = generateId(species, variety ?? '');
+async function save() {
+  const name = plantName.value.trim();
+  if (!name) return;
 
-    const plant: Plant = {
-      id,
-      species,
-      variety,
-      latinName: species,
-      name: { nl: species + (variety ? ` ${variety}` : ''), en: species + (variety ? ` ${variety}` : '') },
-      type: 'flower',
-      lifecycle: 'annual',
-      calendar: { indoorSowing: null, coldGreenhouse: null, outdoor: null, harvestPeriod: null },
-      germination: 'light',
-      colors: [],
-      images: [],
-      heightCm: null,
-      sowingDepthMm: null,
-      germinationDays: null,
-      germinationTempC: null,
-      pinching: false,
-      seedsPerCell: null,
-      careSteps: [],
-      maintenanceNotes: { nl: '', en: '' },
-      plantingConditions: [],
-      minDistanceCm: 20,
-      stemTips: null,
-      sun: 'full-sun',
-      propagation: 'seed',
-      status: 'pending',
-    };
+  const id = generateId(name);
 
-    await createPlant(plant);
-    saved++;
-  }
+  const plant: Plant = {
+    id,
+    species: name,
+    variety: null,
+    latinName: name,
+    name: { nl: name, en: name },
+    type: 'flower',
+    lifecycle: 'annual',
+    calendar: { indoorSowing: null, coldGreenhouse: null, outdoor: null, harvestPeriod: null },
+    germination: 'light',
+    colors: [],
+    images: [],
+    heightCm: null,
+    sowingDepthMm: null,
+    germinationDays: null,
+    germinationTempC: null,
+    pinching: false,
+    seedsPerCell: null,
+    careSteps: [],
+    maintenanceNotes: { nl: '', en: '' },
+    plantingConditions: [],
+    minDistanceCm: 20,
+    stemTips: null,
+    sun: 'full-sun',
+    propagation: 'seed',
+    status: 'pending',
+  };
 
-  $q.notify({ type: 'positive', message: t('admin.savedPending', { count: saved }) });
-  rows.value = [{ species: '', variety: '' }];
+  await createPlant(plant);
+  $q.notify({ type: 'positive', message: t('admin.savedPending', { count: 1 }) });
+  plantName.value = '';
+  inputEl.value?.focus();
 }
 </script>
 
@@ -295,133 +230,19 @@ async function saveAll() {
   margin: 0 2px;
 }
 
-// ── Section label ──
-.section-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-
-  &__icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--moss-pale);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--moss);
-
-    .material-icons-outlined {
-      font-size: 17px;
-    }
-  }
-
-  &__text {
-    font-family: var(--font-display);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--deep-brown);
-  }
-
-  &__line {
-    flex: 1;
-    height: 1px;
-    background: var(--border-light);
-  }
-}
-
-// ── Add button ──
-.add-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 12px;
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 10px;
-  transition: all 0.2s ease;
-
-  .material-icons-outlined {
-    font-size: 18px;
-  }
-
-  &:hover {
-    border-color: var(--clay-light);
-    color: var(--clay);
-    background: rgba(184, 136, 110, 0.03);
-  }
-}
-
-// ── Input cards ──
-.input-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.input-card {
-  background: var(--warm-white);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  box-shadow: var(--shadow-soft);
-  position: relative;
-  border: 1.5px solid transparent;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:focus-within {
-    border-color: var(--clay-light);
-    box-shadow: var(--shadow-card);
-  }
-
-  &__remove {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 26px;
-    height: 26px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: var(--muted-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.15s ease;
-
-    .material-icons-outlined {
-      font-size: 18px;
-    }
-
-    &:hover {
-      background: rgba(194, 91, 78, 0.08);
-      color: var(--overdue);
-    }
-  }
-
-  &__fields {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-right: 28px;
-  }
-}
-
 // ── Field ──
 .field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-bottom: 16px;
+
+  &__hint {
+    font-size: 12px;
+    color: var(--muted-light);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
 
   &__label {
     font-size: 11px;
@@ -433,15 +254,6 @@ async function saveAll() {
 
   &__required {
     color: var(--clay);
-  }
-
-  &__optional {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--muted-light);
-    font-style: italic;
-    text-transform: none;
-    letter-spacing: 0;
   }
 
   &__input {
@@ -466,7 +278,6 @@ async function saveAll() {
     }
 
     &--filled {
-      font-style: italic;
       font-weight: 500;
     }
   }
@@ -505,13 +316,6 @@ async function saveAll() {
     cursor: not-allowed;
   }
 
-  &__count {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 1px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 700;
-  }
 }
 
 // ── Divider ──

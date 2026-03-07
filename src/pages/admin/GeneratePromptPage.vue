@@ -354,8 +354,8 @@ async function copyPrompt() {
   }
 
   &__species {
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 400;
     color: var(--deep-brown);
     font-style: italic;
     line-height: 1.3;
@@ -378,10 +378,14 @@ async function copyPrompt() {
   }
 
   &__date {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--clay-light);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--clay);
     white-space: nowrap;
+    background: var(--clay-pale);
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.2px;
   }
 
   &__delete {

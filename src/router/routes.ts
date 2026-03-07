@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/admin/GeneratePromptPage.vue'),
       },
       {
+        path: 'admin/images',
+        meta: { requiresAdmin: true },
+        component: () => import('pages/admin/ImagePromptPage.vue'),
+      },
+      {
         path: 'admin/import',
         meta: { requiresAdmin: true },
         component: () => import('pages/admin/ImportDataPage.vue'),

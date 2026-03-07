@@ -12,27 +12,25 @@
   </q-page>
 
   <!-- Detail page -->
-  <q-page v-else class="detail-page">
-
-    <!-- ── 0. STICKY NAV (JS-driven position) ── -->
-    <div ref="navRef" class="sticky-nav">
-      <button class="sticky-nav__btn" @click="router.back()">
-        <span class="material-icons-outlined">arrow_back</span>
-      </button>
-      <button
-        class="sticky-nav__btn"
-        :class="{ 'sticky-nav__btn--fav-active': favoritesStore.isFavorite(plant.id) }"
-        @click="favoritesStore.toggleFavorite(plant.id)"
-      >
-        <span class="material-icons-outlined">{{ favoritesStore.isFavorite(plant.id) ? 'favorite' : 'favorite_border' }}</span>
-      </button>
-    </div>
+  <q-page v-else class="detail-page" data-page="plant-detail">
 
     <!-- ── 1. HERO ── -->
-    <div ref="heroRef" class="hero" @touchstart="onTouchStart" @touchend="onTouchEnd">
+    <div class="hero" @touchstart="onTouchStart" @touchend="onTouchEnd">
+      <!-- Nav overlay inside hero -->
+      <div class="sticky-nav">
+        <button class="sticky-nav__btn" @click="router.back()">
+          <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        <button
+          class="sticky-nav__btn"
+          :class="{ 'sticky-nav__btn--fav-active': favoritesStore.isFavorite(plant.id) }"
+          @click="favoritesStore.toggleFavorite(plant.id)"
+        >
+          <span class="material-icons-outlined">{{ favoritesStore.isFavorite(plant.id) ? 'favorite' : 'favorite_border' }}</span>
+        </button>
+      </div>
       <img
         v-if="currentImage"
-        ref="heroImgRef"
         :src="currentImage.url"
         :alt="displayName"
         class="hero__img"
@@ -443,10 +441,7 @@ import { useStockStore } from 'src/stores/stock-store';
 import { useFavoritesStore } from 'src/stores/favorites-store';
 import { useLocale } from 'src/composables/useLocale';
 import { normalizeImage } from 'src/types/plant';
-import { scroll } from 'quasar';
 import AddPlantingDialog from 'src/components/garden/AddPlantingDialog.vue';
-
-const { getScrollTarget, getVerticalScrollPosition } = scroll;
 
 const { t } = useI18n();
 const route = useRoute();
@@ -496,42 +491,18 @@ function onTouchEnd(e: TouchEvent) {
   }
 }
 
-// ── Scroll handling — parallax hero + floating nav ──
-const heroRef = ref<HTMLElement>();
-const heroImgRef = ref<HTMLImageElement>();
-const navRef = ref<HTMLElement>();
-let scrollTarget: Element | Window | null = null;
 
-function onScroll() {
-  if (!scrollTarget) return;
-  const scrollY = getVerticalScrollPosition(scrollTarget);
-
-  // Parallax: counter-translate image so it appears fixed
-  if (heroImgRef.value && heroRef.value) {
-    const heroH = heroRef.value.offsetHeight;
-    if (scrollY < heroH + 100) {
-      heroImgRef.value.style.transform = `translateY(${scrollY}px)`;
-    }
-  }
-
-  // Floating nav: translate down to follow scroll
-  if (navRef.value) {
-    navRef.value.style.transform = `translateY(${scrollY}px)`;
-  }
-}
-
+// ── Override parent bg to warm-white while detail page is active ──
 onMounted(() => {
-  if (heroRef.value) {
-    scrollTarget = getScrollTarget(heroRef.value);
-    scrollTarget.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-  }
+  document.documentElement.style.setProperty('background', 'var(--warm-white)');
+  document.body.style.setProperty('background', 'var(--warm-white)');
+  document.querySelector('.q-page-container')?.setAttribute('style',
+    'background: var(--warm-white); position: relative; z-index: 1;');
 });
-
 onUnmounted(() => {
-  if (scrollTarget) {
-    scrollTarget.removeEventListener('scroll', onScroll as EventListener);
-  }
+  document.documentElement.style.removeProperty('background');
+  document.body.style.removeProperty('background');
+  document.querySelector('.q-page-container')?.removeAttribute('style');
 });
 
 // ── Tabs ──
@@ -675,12 +646,11 @@ function isLightColor(hex: string): boolean {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 4; /* below .sheet (z-index: 5) so buttons tuck behind it */
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   padding: 10px 16px;
   pointer-events: none;
-  will-change: transform;
 }
 
 .sticky-nav__btn {
@@ -731,7 +701,6 @@ function isLightColor(hex: string): boolean {
   object-fit: cover;
   display: block;
   filter: contrast(1.06) saturate(1.08);
-  will-change: transform;
 }
 
 .hero__placeholder {
@@ -801,7 +770,7 @@ function isLightColor(hex: string): boolean {
   background: var(--warm-white);
   border-radius: 24px 24px 0 0;
   z-index: 5;
-  padding-bottom: 0;
+  padding-bottom: 40px;
   min-height: 500px;
   box-shadow: 0 -4px 20px rgba(53, 43, 34, 0.08);
 }
@@ -1387,5 +1356,12 @@ function isLightColor(hex: string): boolean {
 
   &:hover { box-shadow: 0 4px 16px rgba(92, 107, 78, 0.3); }
   &:active { transform: scale(0.97); }
+}
+</style>
+
+<style lang="scss">
+/* Unscoped: override parent container bg when detail page is active */
+.q-page-container:has([data-page="plant-detail"]) {
+  background: var(--warm-white) !important;
 }
 </style>

@@ -1,0 +1,113 @@
+/**
+ * Fix new plants: delete old misspelled docs, update incomplete ones.
+ * Usage: npx tsx scripts/fix-new-plants.ts
+ */
+import { initializeApp, applicationDefault } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+initializeApp({ credential: applicationDefault(), projectId: 'floranova-2cb63' });
+const db = getFirestore();
+
+// Old docs to delete (misspelled / wrong IDs)
+const toDelete = [
+  'alcea-rosae-sprint-celeberty-apricot',
+  'chinese-aster-apricot',
+];
+
+// Docs that already existed but need full data overwrite (keep images)
+const toUpdate: Record<string, Record<string, unknown>> = {
+  'celosia-spicata-celway-terracotta': {
+    species: 'Celosia spicata',
+    variety: 'Celway Terracotta',
+    latinName: 'Celosia argentea var. spicata',
+    name: { nl: 'Tarwecelosia Celway Terracotta', en: 'Wheat Celosia Celway Terracotta' },
+    type: 'flower',
+    lifecycle: 'annual',
+    propagation: 'seed',
+    calendar: { indoorSowing: [3, 4], coldGreenhouse: null, outdoor: null, harvestPeriod: [7, 8, 9, 10] },
+    germination: 'light',
+    colors: [{ name: 'terracotta', hex: '#CC5833' }, { name: 'salmon', hex: '#FA8072' }],
+    heightCm: { min: 90, max: 120 },
+    sowingDepthMm: 0,
+    germinationDays: { min: 6, max: 15 },
+    germinationTempC: { min: 21, max: 29 },
+    pinching: true,
+    seedsPerCell: 1,
+    careSteps: [
+      { action: { nl: 'Zaailingen afkweken bij lagere temperatuur', en: 'Grow seedlings at lower temperature' }, condition: { type: 'days', value: 10, unit: 'days', description: { nl: 'Na opkomst, kweken bij 17-20C. Vermijd temperaturen onder 15C om premature bloei te voorkomen.', en: 'After emergence, grow at 17-20C. Avoid temperatures below 15C to prevent premature flowering.' } }, order: 1 },
+      { action: { nl: 'Toppen', en: 'Pinch' }, condition: { type: 'height', value: 15, unit: 'cm', description: { nl: 'Wanneer zaailingen ca. 15 cm hoog zijn, top afknijpen om vertakking te bevorderen.', en: 'When seedlings are approx. 15 cm tall, pinch the growing tip to promote branching.' } }, order: 2 },
+      { action: { nl: 'Afharden', en: 'Harden off' }, condition: { type: 'days', value: 7, unit: 'days', description: { nl: 'Geleidelijk afharden gedurende 7-10 dagen voor uitplanten. Pas na de laatste vorst.', en: 'Gradually harden off over 7-10 days before transplanting. Only after last frost.' } }, order: 3 },
+      { action: { nl: 'Uitplanten', en: 'Plant outside' }, condition: { type: 'date', value: null, unit: null, description: { nl: 'Na de laatste vorst, wanneer nachttemperatuur boven 10C blijft. Celosia is zeer vorstgevoelig.', en: 'After last frost, when nighttime temperatures stay above 10C. Celosia is very frost-sensitive.' } }, order: 4 },
+    ],
+    maintenanceNotes: { nl: 'Warmteminnend gewas, gedijt het best bij volle zon en warme zomers. Compostrijke, goed doorlatende grond. Regelmatig water geven maar niet te nat houden. Uitstekende snijbloem en droogbloem.', en: 'Heat-loving crop, thrives in full sun and warm summers. Compost-rich, well-drained soil. Water regularly but do not keep too wet. Excellent cut flower and dried flower.' },
+    plantingConditions: ['tray'],
+    minDistanceCm: 20,
+    stemTips: { nl: 'Oogst wanneer de aren bijna volledig gekleurd zijn maar de top nog enigszins groen is. Vaaslevensduur 10-14 dagen. Droogt uitstekend: hang ondersteboven op een droge, donkere plek.', en: 'Harvest when spikes are nearly fully colored but the tip is still slightly green. Vase life 10-14 days. Dries excellently: hang upside down in a dry, dark location.' },
+    sun: 'full-sun',
+    status: 'unverified',
+  },
+  'thunbergia-alata-african-sunset': {
+    species: 'Thunbergia alata',
+    variety: 'African Sunset',
+    latinName: 'Thunbergia alata',
+    name: { nl: 'Suzanne-met-de-mooie-ogen African Sunset', en: 'Black-eyed Susan Vine African Sunset' },
+    type: 'flower',
+    lifecycle: 'annual',
+    propagation: 'seed',
+    calendar: { indoorSowing: [3, 4], coldGreenhouse: null, outdoor: null, harvestPeriod: [6, 7, 8, 9, 10] },
+    germination: 'dark',
+    colors: [{ name: 'terracotta', hex: '#CC5833' }, { name: 'orange', hex: '#F97316' }, { name: 'red', hex: '#EF4444' }, { name: 'apricot', hex: '#FBCEB1' }, { name: 'cream', hex: '#FFFDD0' }],
+    heightCm: { min: 150, max: 200 },
+    sowingDepthMm: 6,
+    germinationDays: { min: 14, max: 21 },
+    germinationTempC: { min: 20, max: 25 },
+    pinching: true,
+    seedsPerCell: 2,
+    careSteps: [
+      { action: { nl: 'Zaden weken', en: 'Soak seeds' }, condition: { type: 'custom', value: null, unit: null, description: { nl: 'Week de zaden een nacht in lauw water voor het zaaien om de kieming te versnellen', en: 'Soak seeds overnight in lukewarm water before sowing to speed up germination' } }, order: 1 },
+      { action: { nl: 'Oppotten', en: 'Pot on' }, condition: { type: 'leaves', value: 2, unit: 'leaves', description: { nl: 'Wanneer zaailingen 2 echte blaadjes hebben, verpot naar 8 cm potjes', en: 'When seedlings have 2 true leaves, transplant to 8 cm pots' } }, order: 2 },
+      { action: { nl: 'Toppen', en: 'Pinch tips' }, condition: { type: 'height', value: 15, unit: 'cm', description: { nl: 'Knip de groeipunten af wanneer de plant ca. 15 cm hoog is om vertakking te stimuleren', en: 'Pinch out growing tips when plant is approx. 15 cm tall to encourage branching' } }, order: 3 },
+      { action: { nl: 'Uitplanten met steun', en: 'Plant out with support' }, condition: { type: 'date', value: null, unit: null, description: { nl: 'Na de laatste vorst (half mei). Plant bij een trellis, hek of klimsteun.', en: 'After last frost (mid-May). Plant near a trellis, fence or climbing support.' } }, order: 4 },
+    ],
+    maintenanceNotes: { nl: 'Volle zon, vochtige maar goed doorlatende grond. Regelmatig water geven en bijmesten tijdens het groeiseizoen. Heeft een klimsteun nodig. Niet vorstbestendig.', en: 'Full sun, moist but well-drained soil. Water regularly and fertilize during the growing season. Requires climbing support. Not frost-hardy.' },
+    plantingConditions: ['tray', 'pot'],
+    minDistanceCm: 35,
+    stemTips: null,
+    sun: 'full-sun',
+    status: 'unverified',
+  },
+};
+
+async function fix() {
+  // Delete old misspelled docs
+  for (const id of toDelete) {
+    const doc = await db.collection('plants').doc(id).get();
+    if (doc.exists) {
+      await db.collection('plants').doc(id).delete();
+      console.log(`DELETED ${id}`);
+    } else {
+      console.log(`SKIP DELETE ${id} (not found)`);
+    }
+  }
+
+  // Update incomplete docs (preserve images)
+  for (const [id, data] of Object.entries(toUpdate)) {
+    const doc = await db.collection('plants').doc(id).get();
+    if (!doc.exists) {
+      console.log(`SKIP UPDATE ${id} (not found)`);
+      continue;
+    }
+    const existing = doc.data()!;
+    // Keep existing images
+    const updates = { ...data, updatedAt: new Date().toISOString() };
+    if (existing.images && existing.images.length > 0) {
+      delete (updates as Record<string, unknown>).images;
+    }
+    await db.collection('plants').doc(id).update(updates);
+    console.log(`UPDATED ${id}`);
+  }
+
+  console.log('\nDone!');
+}
+
+fix().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });

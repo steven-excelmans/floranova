@@ -1,10 +1,9 @@
 <template>
   <q-layout view="hHh Lpr fFf">
-    <q-header class="floranova-header" :class="{ 'floranova-header--admin': isAdminSection }" :elevated="false">
+    <q-header v-if="!isPlantDetail" class="floranova-header" :class="{ 'floranova-header--admin': isAdminSection }" :elevated="false">
       <div class="header__top">
         <div class="header__brand">
-          <router-link v-if="isAdminSection" to="/catalog" class="header__logo">floranova<span class="header__logo-dot">.</span></router-link>
-          <div v-else class="header__logo">floranova<span class="header__logo-dot">.</span></div>
+          <router-link to="/catalog" class="header__logo">floranova<span class="header__logo-dot">.</span></router-link>
           <span v-if="isAdminSection" class="header__admin-badge">{{ t('admin.title') }}</span>
         </div>
         <div class="header__actions">
@@ -112,6 +111,7 @@ const { isStandalone } = useDisplayMode();
 const activeTab = ref('catalog');
 
 const isAdminSection = computed(() => route.path.startsWith('/admin'));
+const isPlantDetail = computed(() => /^\/plant\/[^/]+$/.test(route.path));
 
 const appNavItems = computed(() => [
   { to: '/catalog', icon: 'eco', label: t('nav.catalog') },
@@ -123,6 +123,7 @@ const adminNavItems = computed(() => [
   { to: '/admin', icon: 'dashboard', label: t('admin.dashboard') },
   { to: '/admin/plants', icon: 'eco', label: t('admin.plants') },
   { to: '/admin/prompt', icon: 'auto_awesome', label: t('admin.prompt') },
+  { to: '/admin/images', icon: 'auto_fix_high', label: t('admin.imagesNav') },
   { to: '/admin/import', icon: 'upload', label: t('admin.import') },
 ]);
 

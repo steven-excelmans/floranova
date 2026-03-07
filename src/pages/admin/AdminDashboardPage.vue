@@ -102,6 +102,11 @@
         <span class="action__text">{{ t('admin.generatePromptAction') }}</span>
         <span class="material-icons-outlined action__arrow">chevron_right</span>
       </router-link>
+      <router-link to="/admin/images" class="action">
+        <span class="material-icons-outlined action__icon">auto_fix_high</span>
+        <span class="action__text">{{ t('admin.imagePromptAction') }}</span>
+        <span class="material-icons-outlined action__arrow">chevron_right</span>
+      </router-link>
       <router-link to="/admin/import" class="action">
         <span class="material-icons-outlined action__icon">upload</span>
         <span class="action__text">{{ t('admin.importData') }}</span>

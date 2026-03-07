@@ -22,7 +22,7 @@ Plant Data Schema:
   },
   germination: "light" | "dark",
   colors: [{ name: string, hex: string }],          // Flower/leaf colors
-  images: [{ url: string, isCover?: boolean }] | string[],  // Image URLs (string[] also accepted)
+  images: [],                                          // Leave empty — images are managed separately
   heightCm: { min: number, max: number } | null,
   sowingDepthMm: number | null,
   germinationDays: { min: number, max: number } | null,
@@ -92,7 +92,7 @@ ${exampleJson}
 3. Calendar months are 1-12 (January=1, December=12), specific to Belgian/Western European climate
 4. Care steps should be ordered chronologically after germination
 5. Colors should include name and exact hex code
-6. For images, use Wikipedia Commons or other public domain sources
+6. Set images to an empty array []. Images are managed separately.
 7. Set status to "unverified" for all plants
 8. For tuber/bulb plants: set propagation to "tuber", germination fields (germination, germinationDays, germinationTempC, seedsPerCell) can be null. Calendar indoorSowing = pre-sprout period, outdoor = planting period.
 9. harvestPeriod: for flowers = bloom period, for vegetables/herbs = harvest period. List the months when the plant blooms or produces harvest.
@@ -109,5 +109,37 @@ Respond with a JSON array containing the plant objects:
 \`\`\``;
   }
 
-  return { generatePrompt };
+  function generateImagePrompt(plants: Plant[]): string {
+    const plantList = plants
+      .map((p, i) => {
+        const colors = p.colors.map((c) => c.name).join(', ');
+        const typeLabel = p.type === 'flower' ? 'Flower' : p.type === 'herb' ? 'Herb' : 'Vegetable';
+        return `${i + 1}. ${p.species}${p.variety ? ` '${p.variety}'` : ''}
+   Type: ${typeLabel}${colors ? `, ${colors} colored` : ''}
+   Look for: A clear photo showing the specific variety in bloom or at its most recognizable stage`;
+      })
+      .join('\n\n');
+
+    return `I need help finding high-quality images for ${plants.length} plants in my flower-growing app. For each plant, please find 1-2 image URLs from reputable sources (seed company websites, nursery catalogs, Flickr Creative Commons, or botanical databases).
+
+Requirements:
+- Images should show the plant in bloom or at its most recognizable stage
+- Prefer close-up or portrait-oriented photos with soft, natural lighting
+- Minimum resolution: 800x600px
+- The image should clearly represent the specific variety listed
+- Avoid watermarked or heavily edited images
+- URLs must be direct links to the image file (ending in .jpg, .png, or .webp)
+
+Plants to find images for:
+
+${plantList}
+
+For each plant, please respond in this format:
+Plant: [species 'variety']
+Image 1: [direct image URL]
+Image 2: [direct image URL] (optional)
+Source: [website name]`;
+  }
+
+  return { generatePrompt, generateImagePrompt };
 }
