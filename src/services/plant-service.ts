@@ -5,6 +5,7 @@ import {
   setDoc,
   deleteDoc,
   query,
+  arrayUnion,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from 'src/boot/firebase';
@@ -46,6 +47,13 @@ export async function createPlant(plant: Plant): Promise<void> {
 
 export async function updatePlantStatus(id: string, status: PlantStatus): Promise<void> {
   await setDoc(plantDoc(id), { status, updatedAt: new Date().toISOString() }, { merge: true });
+}
+
+export async function addPlantImage(id: string, image: { url: string }): Promise<void> {
+  await setDoc(plantDoc(id), {
+    images: arrayUnion(image),
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
 }
 
 export async function deletePlant(id: string): Promise<void> {

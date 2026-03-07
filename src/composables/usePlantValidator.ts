@@ -33,8 +33,17 @@ function validateBilingualText(obj: unknown, fieldName: string): string[] {
   return errors;
 }
 
+function stripQuotedVariety(name: string, variety: string): string {
+  // Strip variety from name if it appears as a quoted suffix like "Zinnia 'Queen Lime'"
+  for (const [open, close] of [["'", "'"], ['\u2018', '\u2019']]) {
+    const suffix = `${open}${variety}${close}`;
+    if (name.endsWith(suffix)) return name.slice(0, -suffix.length).trimEnd();
+  }
+  return name;
+}
+
 export function usePlantValidator() {
-  function validatePlant(data: Record<string, unknown>): ValidationResult {
+  function validatePlant(data: Record<string, unknown>, existingPlants?: Plant[]): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -108,6 +117,29 @@ export function usePlantValidator() {
     if (!Array.isArray(data.careSteps)) warnings.push('careSteps: should be an array');
     if (!Array.isArray(data.plantingConditions)) warnings.push('plantingConditions: should be an array');
 
+    // Clean up quoted variety in name and latinName fields
+    if (data.variety && typeof data.variety === 'string') {
+      const variety = data.variety;
+      if (data.name && typeof data.name === 'object') {
+        const nameObj = data.name as Record<string, string>;
+        if (nameObj.nl) nameObj.nl = stripQuotedVariety(nameObj.nl, variety);
+        if (nameObj.en) nameObj.en = stripQuotedVariety(nameObj.en, variety);
+      }
+      if (typeof data.latinName === 'string') {
+        data.latinName = stripQuotedVariety(data.latinName, variety);
+      }
+    }
+
+    // Duplicate detection — warn if same species+variety already exists
+    if (existingPlants && typeof data.species === 'string') {
+      const dupe = existingPlants.find(
+        (p) => p.id !== data.id && p.species === data.species && (p.variety || null) === (data.variety || null),
+      );
+      if (dupe) {
+        warnings.push(`Duplicate: ${dupe.id} has the same species/variety`);
+      }
+    }
+
     // Name corrections
     const nameCorrections = data.nameCorrections as Record<string, string> | undefined;
     const hasNameCorrections = !!nameCorrections && typeof nameCorrections === 'object';
@@ -135,7 +167,7 @@ export function usePlantValidator() {
     };
   }
 
-  function parseAndValidate(jsonString: string): { results: ValidationResult[]; parseError?: string } {
+  function parseAndValidate(jsonString: string, existingPlants?: Plant[]): { results: ValidationResult[]; parseError?: string } {
     let parsed: unknown;
     try {
       parsed = JSON.parse(jsonString);
@@ -152,7 +184,7 @@ export function usePlantValidator() {
       }
     }
 
-    const results = (parsed as Record<string, unknown>[]).map((item) => validatePlant(item));
+    const results = (parsed as Record<string, unknown>[]).map((item) => validatePlant(item, existingPlants));
     return { results };
   }
 

@@ -21,6 +21,7 @@ export default {
     seed: 'Zaden',
     tuber: 'Knollen',
     inStockOnly: 'Alleen op voorraad',
+    showGermination: 'Kiemiconen',
     allSun: 'Alle',
     fullSun: 'Volle zon',
     partialShade: 'Halfschaduw',
@@ -383,6 +384,7 @@ export default {
     selectedLabel: 'geselecteerd',
     deleteSelected: 'Selectie verwijderen',
     deleteSelectedTitle: 'Selectie verwijderen?',
+    deleteSelectedMessage: '{count} geselecteerde plant(en) verwijderen? Dit kan niet ongedaan worden.',
     // Generate Prompt page
     generatePromptDesc: 'Selecteer planten in afwachting om een onderzoeksprompt voor Claude Code te genereren.',
     selectAllPending: 'Selecteer alle in afwachting',
@@ -411,6 +413,7 @@ export default {
     // Import wizard
     pasteJson: 'JSON plakken',
     pasteHint: 'Plak een JSON-array met plantobjecten of een enkel plantobject.',
+    pasteHintImages: 'Ondersteunt ook afbeelding-JSON: { "plant-id": { "url": "..." } }.',
     validation: 'Validatie',
     error: 'fout',
     errors: 'fouten',

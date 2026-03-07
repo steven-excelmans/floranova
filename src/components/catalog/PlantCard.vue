@@ -32,7 +32,7 @@
         <div class="title-text">
           <div class="plant-name">{{ displayName }} <span v-if="plant.variety" class="plant-variety">'{{ plant.variety }}'</span></div>
           <div class="plant-sub">
-            <span class="plant-latin">{{ plant.latinName }}</span>
+            <span class="plant-latin">{{ cleanLatinName }}</span>
           </div>
         </div>
         <div class="type-icon" :class="plant.type">
@@ -137,11 +137,22 @@ const cover = computed(() => getCardPreviewImage(props.plant.images));
 
 const displayName = computed(() => {
   const full = localize(props.plant.name);
+  if (!props.plant.variety) return full;
   // Strip variety from display name since we show it separately
-  if (props.plant.variety && full.endsWith(props.plant.variety)) {
-    return full.slice(0, -props.plant.variety.length).trimEnd();
-  }
+  // Handle both plain suffix ("Zinnia Queen Lime") and quoted ("Zinnia 'Queen Lime'")
+  const v = props.plant.variety;
+  if (full.endsWith(v)) return full.slice(0, -v.length).trimEnd();
+  if (full.endsWith(`'${v}'`)) return full.slice(0, -(v.length + 2)).trimEnd();
+  if (full.endsWith(`'${v}'`)) return full.slice(0, -(v.length + 2)).trimEnd();
   return full;
+});
+const cleanLatinName = computed(() => {
+  const latin = props.plant.latinName;
+  const v = props.plant.variety;
+  if (!v) return latin;
+  if (latin.endsWith(`'${v}'`)) return latin.slice(0, -(v.length + 2)).trimEnd();
+  if (latin.endsWith(`'${v}'`)) return latin.slice(0, -(v.length + 2)).trimEnd();
+  return latin;
 });
 const imgError = ref(false);
 

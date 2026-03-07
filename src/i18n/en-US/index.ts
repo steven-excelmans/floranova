@@ -21,6 +21,7 @@ export default {
     seed: 'Seeds',
     tuber: 'Tubers',
     inStockOnly: 'In stock only',
+    showGermination: 'Germination icons',
     allSun: 'All',
     fullSun: 'Full sun',
     partialShade: 'Partial shade',
@@ -383,6 +384,7 @@ export default {
     selectedLabel: 'selected',
     deleteSelected: 'Delete selected',
     deleteSelectedTitle: 'Delete selected?',
+    deleteSelectedMessage: 'Delete {count} selected plant(s)? This cannot be undone.',
     // Generate Prompt page
     generatePromptDesc: 'Select pending plants to generate a research prompt for Claude Code.',
     selectAllPending: 'Select all pending',
@@ -411,6 +413,7 @@ export default {
     // Import wizard
     pasteJson: 'Paste JSON',
     pasteHint: 'Paste a JSON array of plant objects or a single plant object.',
+    pasteHintImages: 'Also supports image JSON: { "plant-id": { "url": "..." } }.',
     validation: 'Validation',
     error: 'error',
     errors: 'errors',

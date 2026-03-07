@@ -26,6 +26,7 @@ export const usePlantStore = defineStore('plants', () => {
   const sunFilter = ref<SunRequirement | null>(null);
   const propagationFilter = ref<PropagationType | null>(null);
   const stockOnly = ref(false);
+  const showGermination = ref(true);
   const loading = ref(true);
 
   let unsubscribe: (() => void) | null = null;
@@ -137,6 +138,7 @@ export const usePlantStore = defineStore('plants', () => {
     sunFilter,
     propagationFilter,
     stockOnly,
+    showGermination,
     loading,
     filteredPlants,
     groupedBySpecies,

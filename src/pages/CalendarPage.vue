@@ -38,11 +38,13 @@
           :sun-filter="plantStore.sunFilter"
           :propagation-filter="plantStore.propagationFilter"
           :stock-only="plantStore.stockOnly"
+          :show-germination="plantStore.showGermination"
           @update:search="plantStore.search = $event"
           @update:type-filter="plantStore.typeFilter = $event"
           @update:sun-filter="plantStore.sunFilter = $event"
           @update:propagation-filter="plantStore.propagationFilter = $event"
           @update:stock-only="plantStore.stockOnly = $event"
+          @update:show-germination="plantStore.showGermination = $event"
         />
       </div>
     </Transition>
@@ -51,12 +53,14 @@
     <TimelineView
       v-if="viewMode === 'timeline'"
       :plants="visiblePlants"
+      :show-germination="plantStore.showGermination"
       @select="router.push(`/plant/${$event}`)"
     />
 
     <MonthlyView
       v-else
       :plants="visiblePlants"
+      :show-germination="plantStore.showGermination"
       @select="router.push(`/plant/${$event}`)"
     />
   </q-page>
@@ -68,6 +72,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePlantStore } from 'src/stores/plant-store';
 import { useStockStore } from 'src/stores/stock-store';
+import { useLocale } from 'src/composables/useLocale';
 import PlantFilters from 'src/components/catalog/PlantFilters.vue';
 import TimelineView from 'src/components/calendar/TimelineView.vue';
 import MonthlyView from 'src/components/calendar/MonthlyView.vue';
@@ -76,14 +81,17 @@ const { t } = useI18n();
 const router = useRouter();
 const plantStore = usePlantStore();
 const stockStore = useStockStore();
+const { localize } = useLocale();
 
 const viewMode = ref<'timeline' | 'monthly'>('timeline');
 const filterOpen = ref(false);
 
 const visiblePlants = computed(() => {
-  const filtered = plantStore.filteredPlants;
-  if (!plantStore.stockOnly) return filtered;
-  return filtered.filter((p) => stockStore.isInStock(p.id));
+  let filtered = plantStore.filteredPlants;
+  if (plantStore.stockOnly) {
+    filtered = filtered.filter((p) => stockStore.isInStock(p.id));
+  }
+  return [...filtered].sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
 });
 </script>
 

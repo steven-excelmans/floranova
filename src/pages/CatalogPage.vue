@@ -43,11 +43,13 @@
             :sun-filter="plantStore.sunFilter"
             :propagation-filter="plantStore.propagationFilter"
             :stock-only="plantStore.stockOnly"
+            :show-germination="plantStore.showGermination"
             @update:search="plantStore.search = $event"
             @update:type-filter="plantStore.typeFilter = $event"
             @update:sun-filter="plantStore.sunFilter = $event"
             @update:propagation-filter="plantStore.propagationFilter = $event"
             @update:stock-only="plantStore.stockOnly = $event"
+            @update:show-germination="plantStore.showGermination = $event"
           />
         </div>
       </Transition>

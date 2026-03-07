@@ -42,6 +42,7 @@
           v-for="plant in plants"
           :key="plant.id"
           :plant="plant"
+          :show-germination="showGermination"
           @select="$emit('select', $event)"
         />
       </div>
@@ -62,7 +63,7 @@ import type { Plant } from 'src/types/plant';
 import { getCurrentMonth } from 'src/composables/useCalendar';
 import TimelineRow from './TimelineRow.vue';
 
-defineProps<{ plants: Plant[] }>();
+defineProps<{ plants: Plant[]; showGermination: boolean }>();
 defineEmits<{ select: [id: string] }>();
 
 const { t } = useI18n();
@@ -130,8 +131,8 @@ onMounted(() => {
 /* Grid */
 .timeline-grid {
   display: grid;
-  grid-template-columns: 180px repeat(12, minmax(42px, 1fr));
-  min-width: 684px;
+  grid-template-columns: 220px repeat(12, minmax(42px, 1fr));
+  min-width: 724px;
   padding: 0 6px 0 0;
 }
 

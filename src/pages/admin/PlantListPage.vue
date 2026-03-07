@@ -57,6 +57,7 @@
             <span class="plant-row__species">{{ plant.species }}</span>
             <span v-if="plant.variety" class="plant-row__variety">{{ plant.variety }}</span>
           </div>
+          <div class="plant-row__id">{{ plant.id }}</div>
         </div>
         <button
           v-if="plant.status === 'unverified'"
@@ -164,6 +165,7 @@ const filteredPlants = computed(() => {
       if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
         return (
+          plant.id.toLowerCase().includes(q) ||
           plant.species.toLowerCase().includes(q) ||
           (plant.variety?.toLowerCase().includes(q) ?? false) ||
           plant.name.nl.toLowerCase().includes(q) ||
@@ -172,7 +174,7 @@ const filteredPlants = computed(() => {
       }
       return true;
     })
-    .sort((a, b) => a.species.localeCompare(b.species));
+    .sort((a, b) => a.species.localeCompare(b.species) || (a.variety ?? '').localeCompare(b.variety ?? ''));
 });
 
 
@@ -406,6 +408,15 @@ async function executeDelete() {
       content: '\00b7';
       margin-right: 4px;
     }
+  }
+
+  &__id {
+    font-size: 10px;
+    color: var(--muted-light);
+    font-family: 'Menlo', 'Courier New', monospace;
+    line-height: 1.2;
+    margin-top: 1px;
+    opacity: 0.6;
   }
 
   &__actions {

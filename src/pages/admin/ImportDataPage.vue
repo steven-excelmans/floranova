@@ -28,7 +28,7 @@
 
       <div class="paste-hint">
         <span class="material-icons-outlined">info</span>
-        {{ t('admin.pasteHint') }}
+        {{ t('admin.pasteHint') }} {{ t('admin.pasteHintImages') }}
       </div>
 
       <button class="btn-validate" :disabled="!jsonInput.trim()" @click="validate">
@@ -37,8 +37,8 @@
       </button>
     </div>
 
-    <!-- ═══ STEP 2 — Review ═══ -->
-    <div v-if="currentStep === 2" class="step-view">
+    <!-- ═══ STEP 2 — Review (plants) ═══ -->
+    <div v-if="currentStep === 2 && importMode === 'plants'" class="step-view">
       <StepsBar :current="2" :steps="stepLabels" @go="goToStep" />
 
       <div class="results-header">
@@ -106,6 +106,79 @@
       </button>
     </div>
 
+    <!-- ═══ STEP 2 — Review (images) ═══ -->
+    <div v-if="currentStep === 2 && importMode === 'images'" class="step-view">
+      <StepsBar :current="2" :steps="stepLabels" @go="goToStep" />
+
+      <div class="results-header">
+        <div class="results-header__left">
+          <span class="results-header__title">{{ t('admin.imagesNav') }}</span>
+          <span class="results-badge results-badge--valid">
+            <span class="material-icons-outlined">check</span>
+            {{ imageResults.filter(r => r.found).length }} {{ t('admin.valid') }}
+          </span>
+          <span v-if="imageResults.filter(r => !r.found).length > 0" class="results-badge results-badge--errors">
+            <span class="material-icons-outlined">close</span>
+            {{ imageResults.filter(r => !r.found).length }} {{ t('admin.imagesMissing') }}
+          </span>
+        </div>
+        <button class="results-header__edit" @click="goToStep(1)">
+          <span class="material-icons-outlined">edit</span>
+          JSON
+        </button>
+      </div>
+
+      <div class="plant-list">
+        <div
+          v-for="result in imageResults"
+          :key="result.plantId"
+          class="plant-row plant-row--static"
+          :class="{ 'plant-row--invalid': !result.found }"
+        >
+          <div class="img-thumb">
+            <img v-if="result.found" :src="result.url" :alt="result.plantId" loading="lazy" />
+            <span v-else class="material-icons-outlined">broken_image</span>
+          </div>
+          <div class="plant-row__info">
+            <div class="plant-row__name">
+              {{ result.plantName }}
+              <span
+                class="material-icons-outlined validation-icon"
+                :class="result.found ? 'validation-icon--valid' : 'validation-icon--error'"
+              >{{ result.found ? 'check_circle' : 'cancel' }}</span>
+            </div>
+            <div class="plant-row__sub">
+              <span class="plant-row__species">{{ result.plantId }}</span>
+            </div>
+            <div v-if="!result.found" class="plant-row__badges">
+              <span class="badge badge--error">
+                <span class="material-icons-outlined">error_outline</span>
+                {{ t('admin.plantNotFound') }}
+              </span>
+            </div>
+            <div v-else-if="result.hasImage" class="plant-row__badges">
+              <span class="badge badge--update">{{ t('admin.badgeUpdate') }}</span>
+            </div>
+            <div v-else class="plant-row__badges">
+              <span class="badge badge--new">{{ t('admin.badgeNew') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="btn-import"
+        :disabled="imageResults.filter(r => r.found).length === 0 || importing"
+        @click="doImageImport"
+      >
+        <span class="material-icons-outlined">cloud_upload</span>
+        {{ importing ? imageProgress : t('admin.importBtn') }}
+        <span v-if="!importing" class="btn-import__count">
+          {{ imageResults.filter(r => r.found).length }} {{ t('admin.imagesNav').toLowerCase() }}
+        </span>
+      </button>
+    </div>
+
     <!-- ═══ STEP 3 — Done ═══ -->
     <div v-if="currentStep === 3" class="step-view">
       <StepsBar :current="3" :steps="stepLabels" @go="goToStep" />
@@ -115,14 +188,20 @@
           <span class="material-icons-outlined">check_circle</span>
         </div>
         <h2 class="done-title">{{ t('admin.importDone') }}</h2>
-        <p class="done-desc">{{ t('admin.importDoneDesc', { count: importedPlants.length }) }}</p>
+        <p v-if="importMode === 'plants'" class="done-desc">
+          {{ t('admin.importDoneDesc', { count: importedPlants.length }) }}
+        </p>
+        <p v-else class="done-desc">
+          {{ importedImageCount }} images uploaded to Cloudinary
+        </p>
 
         <div v-if="failedCount > 0" class="done-warning">
           <span class="material-icons-outlined">warning_amber</span>
           <span>{{ t('admin.importPartialFail', { count: failedCount }) }}</span>
         </div>
 
-        <div class="done-list">
+        <!-- Plant import results -->
+        <div v-if="importMode === 'plants'" class="done-list">
           <div v-for="plant in importedPlants" :key="plant.id" class="plant-row plant-row--static">
             <div class="type-icon" :class="plant.type">
               <span class="material-icons-outlined">{{ typeIcon(plant.type) }}</span>
@@ -137,6 +216,26 @@
             <span class="badge" :class="wasExisting(plant.id) ? 'badge--update' : 'badge--new'">
               {{ wasExisting(plant.id) ? t('admin.badgeUpdated') : t('admin.badgeNew') }}
             </span>
+          </div>
+        </div>
+
+        <!-- Image import results -->
+        <div v-if="importMode === 'images'" class="done-list">
+          <div
+            v-for="entry in imageResults.filter(r => r.found)"
+            :key="entry.plantId"
+            class="plant-row plant-row--static"
+          >
+            <div class="img-thumb">
+              <img :src="entry.url" :alt="entry.plantId" loading="lazy" />
+            </div>
+            <div class="plant-row__info">
+              <div class="plant-row__name">{{ entry.plantName }}</div>
+              <div class="plant-row__sub">
+                <span class="plant-row__species">{{ entry.plantId }}</span>
+              </div>
+            </div>
+            <span class="material-icons-outlined" style="color: var(--moss); font-size: 20px;">cloud_done</span>
           </div>
         </div>
 
@@ -165,7 +264,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlantValidator, type ValidationResult } from 'src/composables/usePlantValidator';
-import { savePlant } from 'src/services/plant-service';
+import { savePlant, addPlantImage } from 'src/services/plant-service';
+import { uploadRemoteUrl } from 'src/services/image-service';
 import { usePlantStore } from 'src/stores/plant-store';
 import type { Plant } from 'src/types/plant';
 import PlantEditDialog from 'src/components/admin/PlantEditDialog.vue';
@@ -178,11 +278,24 @@ const plantStore = usePlantStore();
 const currentStep = ref(1);
 const jsonInput = ref('');
 const parseError = ref('');
+const importMode = ref<'plants' | 'images'>('plants');
 const validationResults = ref<ValidationResult[]>([]);
 const importing = ref(false);
 const importedPlants = ref<Plant[]>([]);
 const failedCount = ref(0);
 const existingIdsAtImport = ref<Set<string>>(new Set());
+
+// Image import
+interface ImageImportEntry {
+  plantId: string;
+  url: string;
+  plantName: string;
+  found: boolean;
+  hasImage: boolean;
+}
+const imageResults = ref<ImageImportEntry[]>([]);
+const imageProgress = ref('');
+const importedImageCount = ref(0);
 
 // Edit dialog
 const editDialogOpen = ref(false);
@@ -214,16 +327,89 @@ function wasExisting(id: string): boolean {
 }
 
 function goToStep(step: number) {
-  if (step === 2 && validationResults.value.length === 0) return;
-  if (step === 3 && importedPlants.value.length === 0) return;
+  if (step === 2 && validationResults.value.length === 0 && imageResults.value.length === 0) return;
+  if (step === 3 && importedPlants.value.length === 0 && importedImageCount.value === 0) return;
+  if (step === 1) {
+    importMode.value = 'plants';
+    imageResults.value = [];
+    validationResults.value = [];
+  }
   currentStep.value = step;
+}
+
+/**
+ * Detect if JSON is an image import format:
+ * { "plant-id": { "url": "https://..." }, ... }
+ * or { "plant-id": { "species": "...", "url": "https://..." }, ... }
+ */
+function isImageFormat(parsed: unknown): parsed is Record<string, { url: string }> {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+  const entries = Object.values(parsed as Record<string, unknown>);
+  if (entries.length === 0) return false;
+  // Check first few entries have a url field and no typical plant fields
+  return entries.slice(0, 3).every(
+    (e) => e && typeof e === 'object' && 'url' in (e as Record<string, unknown>),
+  );
 }
 
 function validate() {
   parseError.value = '';
   validationResults.value = [];
+  imageResults.value = [];
 
-  const { results, parseError: err } = parseAndValidate(jsonInput.value);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonInput.value);
+  } catch (e) {
+    parseError.value = `Invalid JSON: ${(e as Error).message}`;
+    return;
+  }
+
+  if (isImageFormat(parsed)) {
+    importMode.value = 'images';
+    const entries = Object.entries(parsed);
+    imageResults.value = entries.map(([key, data]) => {
+      const extra = data as Record<string, unknown>;
+      const speciesStr = (extra.species as string) || '';
+
+      // 1. Try key as plant ID
+      let plant = plantStore.getPlantById(key);
+
+      // 2. Try matching by species + variety from species string
+      if (!plant && speciesStr) {
+        const varMatch = speciesStr.match(/^(.+?)\s+[''\u2018]([^''\u2019]+)[''\u2019]$/);
+        if (varMatch) {
+          plant = plantStore.plants.find(
+            (p) => p.species === varMatch[1] && p.variety === varMatch[2],
+          );
+        }
+        // 3. Try exact species match (for plants without variety)
+        if (!plant) {
+          plant = plantStore.plants.find((p) => p.species === speciesStr && !p.variety);
+        }
+        // 4. Try species-only match (first match)
+        if (!plant) {
+          plant = plantStore.plants.find((p) => p.species === speciesStr);
+        }
+      }
+
+      const name = plant
+        ? (plant.name?.nl || plant.name?.en || plant.species)
+        : speciesStr || key;
+      return {
+        plantId: plant?.id ?? key,
+        url: data.url,
+        plantName: plant ? `${name}${plant.variety ? ` '${plant.variety}'` : ''}` : name,
+        found: !!plant,
+        hasImage: !!plant && plant.images.length > 0,
+      };
+    });
+    currentStep.value = 2;
+    return;
+  }
+
+  importMode.value = 'plants';
+  const { results, parseError: err } = parseAndValidate(jsonInput.value, plantStore.plants);
   if (err) {
     parseError.value = err;
     return;
@@ -233,7 +419,6 @@ function validate() {
 }
 
 async function openEditDialog(result: ValidationResult) {
-  // Save plant to Firestore first so PlantEditDialog can load it
   try {
     await savePlant(result.plant);
     editPlantId.value = result.plant.id;
@@ -247,7 +432,6 @@ async function doImport() {
   importing.value = true;
   const validPlants = validationResults.value.filter((r) => r.valid);
 
-  // Snapshot which IDs existed before import
   existingIdsAtImport.value = new Set(
     validPlants.filter((r) => isExisting(r.plant.id)).map((r) => r.plant.id),
   );
@@ -271,12 +455,39 @@ async function doImport() {
   currentStep.value = 3;
 }
 
+async function doImageImport() {
+  importing.value = true;
+  const toImport = imageResults.value.filter((r) => r.found);
+  let done = 0;
+  let failed = 0;
+
+  for (const entry of toImport) {
+    imageProgress.value = `${done + 1} / ${toImport.length}`;
+    try {
+      const cloudinaryUrl = await uploadRemoteUrl(entry.plantId, entry.url);
+      await addPlantImage(entry.plantId, { url: cloudinaryUrl });
+      done++;
+    } catch (err) {
+      console.error(`Failed to import image for ${entry.plantId}:`, err);
+      failed++;
+    }
+  }
+
+  importedImageCount.value = done;
+  failedCount.value = failed;
+  importing.value = false;
+  currentStep.value = 3;
+}
+
 function reset() {
   currentStep.value = 1;
   jsonInput.value = '';
   parseError.value = '';
+  importMode.value = 'plants';
   validationResults.value = [];
+  imageResults.value = [];
   importedPlants.value = [];
+  importedImageCount.value = 0;
   failedCount.value = 0;
   existingIdsAtImport.value = new Set();
 }
@@ -638,6 +849,30 @@ function reset() {
   font-size: 18px;
   color: var(--muted-light);
   flex-shrink: 0;
+}
+
+/* ── Image thumbnail ── */
+.img-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .material-icons-outlined {
+    font-size: 20px;
+    color: var(--muted-light);
+  }
 }
 
 /* ── Import button ── */

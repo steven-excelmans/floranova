@@ -125,13 +125,22 @@
           </div>
         </div>
 
-        <!-- Stock -->
-        <div class="filter-group">
-          <span class="filter-group__title">{{ t('catalog.availability') }}</span>
-          <StockToggle
-            :in-stock="stockOnly"
-            @toggle="onStockUpdate"
-          />
+        <!-- Stock + Germination toggles -->
+        <div class="filter-row-split">
+          <div class="filter-group">
+            <span class="filter-group__title">{{ t('catalog.availability') }}</span>
+            <StockToggle
+              :in-stock="stockOnly"
+              @toggle="onStockUpdate"
+            />
+          </div>
+          <div class="filter-group filter-group--right">
+            <span class="filter-group__title">{{ t('plant.germination') }}</span>
+            <GerminationToggle
+              :show="showGermination"
+              @toggle="onGerminationUpdate"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -146,6 +155,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { PlantType, SunRequirement, PropagationType } from 'src/types/plant';
 import StockToggle from './StockToggle.vue';
+import GerminationToggle from './GerminationToggle.vue';
 
 const props = defineProps<{
   search: string;
@@ -153,6 +163,7 @@ const props = defineProps<{
   sunFilter: SunRequirement | null;
   propagationFilter: PropagationType | null;
   stockOnly: boolean;
+  showGermination: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -161,6 +172,7 @@ const emit = defineEmits<{
   'update:sunFilter': [value: SunRequirement | null];
   'update:propagationFilter': [value: PropagationType | null];
   'update:stockOnly': [value: boolean];
+  'update:showGermination': [value: boolean];
 }>();
 
 const { t } = useI18n();
@@ -192,6 +204,10 @@ function onPropagationToggle(val: PropagationType) {
 
 function onStockUpdate() {
   emit('update:stockOnly', !props.stockOnly);
+}
+
+function onGerminationUpdate() {
+  emit('update:showGermination', !props.showGermination);
 }
 </script>
 

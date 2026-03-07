@@ -33,6 +33,7 @@
           :key="plant.id"
           :plant="plant"
           :current-month="selectedMonth"
+          :show-germination="showGermination"
           @select="$emit('select', $event)"
         />
       </div>
@@ -53,6 +54,7 @@
           :key="plant.id"
           :plant="plant"
           :current-month="selectedMonth"
+          :show-germination="showGermination"
           @select="$emit('select', $event)"
         />
       </div>
@@ -73,6 +75,7 @@
           :key="plant.id"
           :plant="plant"
           :current-month="selectedMonth"
+          :show-germination="showGermination"
           @select="$emit('select', $event)"
         />
       </div>
@@ -93,7 +96,7 @@ import type { Plant } from 'src/types/plant';
 import { getPlantsForMonth, getCurrentMonth } from 'src/composables/useCalendar';
 import MonthlyActionCard from './MonthlyActionCard.vue';
 
-const props = defineProps<{ plants: Plant[] }>();
+const props = defineProps<{ plants: Plant[]; showGermination: boolean }>();
 defineEmits<{ select: [id: string] }>();
 
 const { t } = useI18n();

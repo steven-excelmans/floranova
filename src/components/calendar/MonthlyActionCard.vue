@@ -11,7 +11,16 @@
     </div>
 
     <div class="monthly-card__info">
-      <div class="monthly-card__name">{{ displayName }}</div>
+      <div class="monthly-card__name">
+        {{ displayName }}
+        <span
+          v-if="showGermination && plant.propagation === 'seed' && plant.germination"
+          class="germ-icon"
+          :class="plant.germination"
+        >
+          <span class="material-icons-outlined">{{ plant.germination === 'light' ? 'light_mode' : 'dark_mode' }}</span>
+        </span>
+      </div>
       <div class="monthly-card__latin">{{ plant.latinName }}</div>
 
       <!-- Mini bloom/harvest bar -->
@@ -43,6 +52,7 @@ import { useLocale } from 'src/composables/useLocale';
 const props = defineProps<{
   plant: Plant;
   currentMonth: number;
+  showGermination: boolean;
 }>();
 defineEmits<{ select: [id: string] }>();
 
@@ -137,6 +147,23 @@ const harvestMonths = computed(() => props.plant.calendar.harvestPeriod);
     color: var(--muted);
     font-style: italic;
     line-height: 1.3;
+  }
+}
+
+/* ── Germination icon ── */
+.germ-icon {
+  .material-icons-outlined {
+    font-size: 14px;
+    vertical-align: -2px;
+    margin-left: 3px;
+  }
+
+  &.light .material-icons-outlined {
+    color: var(--cal-outdoor);
+  }
+
+  &.dark .material-icons-outlined {
+    color: var(--cal-indoor);
   }
 }
 

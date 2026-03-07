@@ -12,8 +12,17 @@
         <span v-else class="material-icons-outlined">{{ plantIcon }}</span>
       </div>
       <div class="plant-name__text">
-        <div class="plant-name__variety">{{ plant.variety ?? displayName }}</div>
-        <div class="plant-name__species">{{ plant.species }}</div>
+        <div class="plant-name__primary">
+          {{ displayName }}
+          <span
+            v-if="showGermination && plant.propagation === 'seed' && plant.germination"
+            class="germ-icon"
+            :class="plant.germination"
+          >
+            <span class="material-icons-outlined">{{ plant.germination === 'light' ? 'light_mode' : 'dark_mode' }}</span>
+          </span>
+        </div>
+        <div class="plant-name__latin">{{ plant.latinName }}</div>
       </div>
     </div>
 
@@ -47,7 +56,7 @@ import { getCardPreviewImage } from 'src/types/plant';
 import { useLocale } from 'src/composables/useLocale';
 import { isMonthInRange, getCurrentMonth, type CalendarAction } from 'src/composables/useCalendar';
 
-const props = defineProps<{ plant: Plant }>();
+const props = defineProps<{ plant: Plant; showGermination: boolean }>();
 defineEmits<{ select: [id: string] }>();
 
 const { localize } = useLocale();
@@ -130,7 +139,7 @@ function hasAction(month: number, action: CalendarAction): boolean {
     overflow: hidden;
   }
 
-  &__variety {
+  &__primary {
     font-family: var(--font-body);
     font-size: 12.5px;
     font-weight: 600;
@@ -141,7 +150,7 @@ function hasAction(month: number, action: CalendarAction): boolean {
     line-height: 1.2;
   }
 
-  &__species {
+  &__latin {
     font-family: var(--font-body);
     font-size: 10.5px;
     font-weight: 400;
@@ -151,6 +160,23 @@ function hasAction(month: number, action: CalendarAction): boolean {
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.3;
+  }
+}
+
+/* Germination icon */
+.germ-icon {
+  .material-icons-outlined {
+    font-size: 11px;
+    vertical-align: -1px;
+    margin-left: 2px;
+  }
+
+  &.light .material-icons-outlined {
+    color: var(--cal-outdoor);
+  }
+
+  &.dark .material-icons-outlined {
+    color: var(--cal-indoor);
   }
 }
 

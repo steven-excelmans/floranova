@@ -97,7 +97,7 @@
           {{ displayName }}
           <span v-if="plant.variety" class="plant-variety">'{{ plant.variety }}'</span>
         </h1>
-        <p class="plant-latin">{{ plant.latinName }}</p>
+        <p class="plant-latin">{{ cleanLatinName }}</p>
 
         <!-- Color swatches -->
         <div v-if="plant.colors.length" class="color-row">
@@ -459,10 +459,22 @@ const plant = computed(() =>
 const displayName = computed(() => {
   if (!plant.value) return '';
   const full = localize(plant.value.name);
-  if (plant.value.variety && full.endsWith(plant.value.variety)) {
-    return full.slice(0, -plant.value.variety.length).trimEnd();
-  }
+  const v = plant.value.variety;
+  if (!v) return full;
+  if (full.endsWith(v)) return full.slice(0, -v.length).trimEnd();
+  if (full.endsWith(`'${v}'`)) return full.slice(0, -(v.length + 2)).trimEnd();
+  if (full.endsWith(`'${v}'`)) return full.slice(0, -(v.length + 2)).trimEnd();
   return full;
+});
+
+const cleanLatinName = computed(() => {
+  if (!plant.value) return '';
+  const latin = plant.value.latinName;
+  const v = plant.value.variety;
+  if (!v) return latin;
+  if (latin.endsWith(`'${v}'`)) return latin.slice(0, -(v.length + 2)).trimEnd();
+  if (latin.endsWith(`'${v}'`)) return latin.slice(0, -(v.length + 2)).trimEnd();
+  return latin;
 });
 
 const isTuber = computed(() => plant.value?.propagation === 'tuber');
